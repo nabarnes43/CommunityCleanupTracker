@@ -29,8 +29,45 @@ const Home = () => {
   const [mapCenter, setMapCenter] = useState([51.505, -0.09]);
   const [userLocation, setUserLocation] = useState(null);
 
+    // Custom component to move the map to the user's location
+    const MapUpdater = () => {
+      const map = useMap();
+  
+      // When userLocation is updated, center the map to that location
+      if (userLocation) {
+        map.flyTo(userLocation, 13, {
+          duration: 3,
+        }); // Set view to user's location with zoom level 13
+      }
+  
+      return null; // This component doesn't render anything itself
+    };
+
+  const handleLocateUser = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const location = [latitude, longitude];
+          setUserLocation(location);
+          setMapCenter(location); // Center the map on the user's location
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+    }
+  };
+
   return (
     <div className="container">
+
+      <button className="location-button" onClick={handleLocateUser}>
+        Drop Pin at My Location
+      </button>
+
       <MapContainer center={mapCenter} zoom={13} className="map-container">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/#map=5/38.007/-95.844/">OpenStreetMap</a>'
@@ -48,6 +85,10 @@ const Home = () => {
             <Popup>You are here!</Popup>
           </Marker>
         )}
+
+
+        {/* Component to automatically update the map's view */}
+        <MapUpdater />
       </MapContainer>
     </div>
   );
