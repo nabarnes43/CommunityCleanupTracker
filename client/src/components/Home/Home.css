@@ -35,4 +35,82 @@
     font-size: 16px;
     color: black;
   }
+
+  /* Custom cluster icon styling */
+.marker-cluster-custom {
+  background-color: #000; /* Black background */
+  border-radius: 8px; /* Rounded corners */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white; /* White text for the number */
+  font-size: 14px; /* Font size for the number */
+  font-weight: bold; /* Make the number bold */
+  width: 40px; /* Width of the cluster */
+  height: 40px; /* Height of the cluster */
+  border: 2px solid #000000; /* Optional: White border for better visibility */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Optional: Shadow for depth */
+}
+
+/* Adjust the cluster size based on the number of markers */
+.marker-cluster-custom.large {
+  width: 60px;
+  height: 60px;
+}
+
+.marker-cluster-custom.medium {
+  width: 50px;
+  height: 50px;
+}
+
+.marker-cluster-custom.small {
+  width: 40px;
+  height: 40px;
+}
   
+
+  /* Center the form as a modal */
+.pin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: fixed; /* Makes the form fixed on the screen */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center the form */
+  background: white;
+  padding: 20px;
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow for a floating effect */
+  z-index: 1000; /* Ensure the form is above the map */
+  width: 300px; /* Fixed width for better layout */
+  max-width: 90%; /* Ensure the form is responsive on small screens */
+}
+
+/* Style for the input fields */
+.pin-form input,
+.pin-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  box-sizing: border-box; /* Ensure padding doesn't affect width */
+}
+
+/* Button styling inside the form */
+.pin-form button {
+  background-color: #000000;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease; /* Smooth transition on hover */
+}
+
+/* Button hover effect */
+.pin-form button:hover {
+  background-color: #474847;
+}

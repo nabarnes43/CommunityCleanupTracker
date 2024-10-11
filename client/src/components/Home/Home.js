@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect} from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import MarkerClusterGroup from 'react-leaflet-markercluster'; // Import MarkerClusterGroup
 import "leaflet/dist/leaflet.css";
 import { Icon } from "leaflet";
 import './Home.css'; // Import CSS
 
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster";
+import L from "leaflet";
+import "leaflet.markercluster";
 
 const customIcon = new Icon({
   iconUrl: require("../../img/marker.png"),
@@ -28,6 +33,9 @@ const initialMarkers = [
 const Home = () => {
   const [mapCenter, setMapCenter] = useState([51.505, -0.09]);
   const [userLocation, setUserLocation] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({ title: '', description: '' });
+  const [markers, setMarkers] = useState(initialMarkers);
 
     // Custom component to move the map to the user's location
     const MapUpdater = () => {
@@ -51,6 +59,7 @@ const Home = () => {
           const location = [latitude, longitude];
           setUserLocation(location);
           setMapCenter(location); // Center the map on the user's location
+          setShowForm(true); // Show the form when location is found
         },
         (error) => {
           console.error("Error getting location:", error);
@@ -61,6 +70,62 @@ const Home = () => {
     }
   };
 
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    if (userLocation) {
+      const newMarker = {
+        position: userLocation,
+        popUp: formData.title,
+        description: formData.description
+      };
+      setMarkers([...markers, newMarker]);
+      setFormData({ title: '', description: '' }); // Reset form
+      setShowForm(false); // Hide the form after submission
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+
+  const MarkerClusterComponent = () => {
+    const map = useMap();
+
+    useEffect(() => {
+      // Custom function to create cluster icons
+      const createCustomClusterIcon = (cluster) => {
+        return L.divIcon({
+          html: `<div class="custom-cluster-icon">${cluster.getChildCount()}</div>`,
+          className: 'marker-cluster-custom', // Custom class for further styling
+          iconSize: L.point(40, 40, true) // Size of the cluster icon
+        });
+      };
+
+      const markerClusterGroup = L.markerClusterGroup({
+        iconCreateFunction: createCustomClusterIcon
+      });
+
+      // Add markers to the cluster group
+      markers.forEach(marker => {
+        L.marker(marker.position, {icon: customIcon})
+          .bindPopup(marker.popUp)
+          .addTo(markerClusterGroup);
+      });
+
+      map.addLayer(markerClusterGroup);
+
+      return () => {
+        map.removeLayer(markerClusterGroup);
+      };
+    }, [map]);
+
+    return null;
+  };
+
   return (
     <div className="container">
 
@@ -68,25 +133,41 @@ const Home = () => {
         Drop Pin at My Location
       </button>
 
+      {showForm && (
+        <form className="pin-form" onSubmit={handleFormSubmit}>
+          <input
+            type="text"
+            name="title"
+            placeholder="Title"
+            value={formData.title}
+            onChange={handleInputChange}
+            required
+          />
+          <textarea
+            name="description"
+            placeholder="Description"
+            value={formData.description}
+            onChange={handleInputChange}
+            required
+          />
+          <button type="submit">Add Pin</button>
+        </form>
+      )}
+
+
       <MapContainer center={mapCenter} zoom={13} className="map-container">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/#map=5/38.007/-95.844/">OpenStreetMap</a>'
           url='https://tile.openstreetmap.org/{z}/{x}/{y}.png'
         />
 
-        {initialMarkers.map((marker, index) => (
-          <Marker key={index} position={marker.position} icon={customIcon}>
-            <Popup>{marker.popUp}</Popup>
-          </Marker>
-        ))}
+          <MarkerClusterComponent />
 
-        {userLocation && (
-          <Marker position={userLocation} icon={customIcon}>
-            <Popup>You are here!</Popup>
-          </Marker>
-        )}
-
-
+          {userLocation && (
+            <Marker position={userLocation} icon={customIcon}>
+              <Popup>You are here!</Popup>
+            </Marker>
+          )}
         {/* Component to automatically update the map's view */}
         <MapUpdater />
       </MapContainer>
