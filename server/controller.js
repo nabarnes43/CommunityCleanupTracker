@@ -1,4 +1,4 @@
-const User = require('./config');
+const {firebase, User, Markers} = require('./config');
 
 // Get all users
 const getAllUsers = async (req, res) => {
@@ -71,6 +71,53 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// Function to fetch all markers from Firestore
+const getAllMarkers = async (req, res) => {
+  try {
+    const snapshot = await Markers.get(); // Fetch all documents in the 'Markers' collection
+    const markers = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        location: [data.position.latitude, data.position.longitude], // Convert position to location array
+        description: data.description,
+        title: data.title
+      };
+    });
+
+    res.status(200).json(markers); // Send the fetched markers as JSON
+  } catch (error) {
+    console.error('Error fetching markers:', error);
+    res.status(500).send({ msg: 'Failed to fetch markers', error: error.message });
+  }
+};
+
+//Save Marker
+const saveMarker = async (req, res) => {
+  const { title, description, position } = req.body;
+
+  // Ensure required fields are present
+  if (!title || !description || !position || !position.latitude || !position.longitude) {
+    return res.status(400).send({ msg: "Title, description, and position (latitude & longitude) are required" });
+  }
+
+  // Prepare marker data
+  const markerData = {
+    title,
+    description,
+    position: new firebase.firestore.GeoPoint(position.latitude, position.longitude), // Firestore GeoPoint for position
+    createdAt: firebase.firestore.FieldValue.serverTimestamp() // Store the creation time
+  };
+
+  try {
+    // Save markerData to the 'Markers' collection in Firestore
+    const docRef = await Markers.add(markerData); // Save the document to Firestore
+    res.send({ msg: "Marker Saved", id: docRef.id }); // Send back the document ID
+  } catch (error) {
+    res.status(500).send({ msg: "Failed to save marker", error: error.message });
+  }
+};
+
+
 async function sendMail(req, res) {
     try{
         const accessToken = await oAuth2Client.getAccessToken();
@@ -126,6 +173,8 @@ module.exports = {
   createUser,
   updateUser,
   deleteUser,
+  getAllMarkers,
+  saveMarker,
   sendMail,
   getMails,
   apiTest

@@ -1,6 +1,5 @@
 import React, { useState, useEffect} from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import MarkerClusterGroup from 'react-leaflet-markercluster'; // Import MarkerClusterGroup
 import "leaflet/dist/leaflet.css";
 import { Icon } from "leaflet";
 import './Home.css'; // Import CSS
@@ -13,6 +12,11 @@ import "leaflet.markercluster";
 const customIcon = new Icon({
   iconUrl: require("../../img/marker.png"),
   iconSize: [38, 38]
+});
+
+const newMarkerIcon = new Icon ({
+  iconUrl: require("../../img/newMarker.png"),
+  iconSize: [50, 50]
 });
 
 const initialMarkers = [
@@ -31,11 +35,37 @@ const initialMarkers = [
 ];
 
 const Home = () => {
-  const [mapCenter, setMapCenter] = useState([51.505, -0.09]);
+  const [mapCenter, setMapCenter] = useState([33.7501, -84.3885]);
   const [userLocation, setUserLocation] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ title: '', description: '' });
   const [markers, setMarkers] = useState(initialMarkers);
+
+    // Fetch existing markers from the backend when the component mounts
+    useEffect(() => {
+      const fetchMarkers = async () => {
+        try {
+          const response = await fetch('http://localhost:4000/user/markers', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+  
+          if (response.ok) {
+            const data = await response.json();
+            setMarkers(data); // Update markers state with fetched data
+          } else {
+            console.error('Error fetching markers:', await response.json());
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      };
+  
+      fetchMarkers(); // Trigger the fetch when the component mounts
+    }, []); // Empty dependency array ensures this runs only once
+
 
     // Custom component to move the map to the user's location
     const MapUpdater = () => {
@@ -70,7 +100,7 @@ const Home = () => {
     }
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (userLocation) {
       const newMarker = {
@@ -81,6 +111,35 @@ const Home = () => {
       setMarkers([...markers, newMarker]);
       setFormData({ title: '', description: '' }); // Reset form
       setShowForm(false); // Hide the form after submission
+      
+      // Next, create the newMarker object with position, title, and description
+      const savedMarker = {
+        title: formData.title,          // Marker title or popup text
+        description: formData.description, // Marker description
+        position : {
+          latitude: userLocation[0],  // Access latitude from the array
+          longitude: userLocation[1]  // Access longitude from the array
+        }             // Attach the position object
+      };
+      
+      // NEW: Send the marker to the backend
+      try {
+        const response = await fetch('http://localhost:4000/user/createMarker', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(savedMarker),
+        });
+
+        if (response.ok) {
+          console.log('Marker saved successfully!');
+        } else {
+          console.error('Error saving marker:', await response.json());
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
     }
   };
 
@@ -94,7 +153,7 @@ const Home = () => {
 
   const MarkerClusterComponent = () => {
     const map = useMap();
-
+  
     useEffect(() => {
       // Custom function to create cluster icons
       const createCustomClusterIcon = (cluster) => {
@@ -104,25 +163,34 @@ const Home = () => {
           iconSize: L.point(40, 40, true) // Size of the cluster icon
         });
       };
-
+  
       const markerClusterGroup = L.markerClusterGroup({
         iconCreateFunction: createCustomClusterIcon
       });
+      
+      if (markers) {
+        // Add markers to the cluster group
+        markers.forEach(marker => {
+          // Check if `location` exists and is a valid array with two numbers (latitude, longitude)
+          if (marker.location) {
+            L.marker(marker.location, { icon: customIcon }) // Use `location` array directly
+              .bindPopup(`<b>${marker.title}</b><br/>${marker.description}`) // Include both title and description
+              .addTo(markerClusterGroup);
+          } else {
+            console.warn(`Invalid marker data:`, marker);
+          }
+        });
 
-      // Add markers to the cluster group
-      markers.forEach(marker => {
-        L.marker(marker.position, {icon: customIcon})
-          .bindPopup(marker.popUp)
-          .addTo(markerClusterGroup);
-      });
-
+      } else {
+        console.warn(`Invalid markers:`, markers);
+      }
       map.addLayer(markerClusterGroup);
-
+  
       return () => {
         map.removeLayer(markerClusterGroup);
       };
     }, [map]);
-
+  
     return null;
   };
 
@@ -164,7 +232,7 @@ const Home = () => {
           <MarkerClusterComponent />
 
           {userLocation && (
-            <Marker position={userLocation} icon={customIcon}>
+            <Marker position={userLocation} icon={newMarkerIcon}>
               <Popup>You are here!</Popup>
             </Marker>
           )}
