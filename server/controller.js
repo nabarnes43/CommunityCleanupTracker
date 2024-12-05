@@ -1,4 +1,12 @@
-const {firebase, User, Markers} = require('./config');
+const {firebase, User, Markers, storage} = require('./config');
+const { Readable } = require('stream'); // Required to handle buffer streaming
+const multer = require('multer');
+
+
+const storage = getStorage();
+const upload = multer({ storage: multer.memoryStorage() }); // Use memory storage for multer
+
+
 
 // Get all users
 const getAllUsers = async (req, res) => {
@@ -77,11 +85,36 @@ const getAllMarkers = async (req, res) => {
     const snapshot = await Markers.get(); // Fetch all documents in the 'Markers' collection
     const markers = snapshot.docs.map(doc => {
       const data = doc.data();
-      return {
-        location: [data.position.latitude, data.position.longitude], // Convert position to location array
-        description: data.description,
-        title: data.title
+      const marker = {
+        location: [data.location.latitude, data.location.longitude], // Convert Firestore GeoPoint to location array
+        moodNotes: data.moodNotes || null,
+        date: data.date instanceof firebase.firestore.Timestamp ? data.date.toDate() : data.date || null, // Safely convert Firestore timestamp
+        notes: data.notes || null,
+        formType: data.formType || null
       };
+
+      // Add fields based on formType
+      if (data.formType === 'Dumping') {
+        marker.dumpingDetails = {
+          typeOfDumping: data.dumpingDetails?.typeOfDumping || null,
+          locationOfDumping: data.dumpingDetails?.locationOfDumping || null,
+          amountOfDumping: data.dumpingDetails?.amountOfDumping || null,
+        };
+      } else if (data.formType === 'StandingWater') {
+        marker.standingWaterDetails = {
+          weatherCondition: data.standingWaterDetails?.weatherCondition || null,
+          standingWaterLocation: data.standingWaterDetails?.standingWaterLocation || null,
+          presenceOfMold: data.standingWaterDetails?.presenceOfMold || null,
+        };
+      } else if (data.formType === 'Stormwater') {
+        marker.stormwaterProblemDetails = {
+          stormwaterProblemLocation: data.stormwaterProblemDetails?.stormwaterProblemLocation || null,
+          stormwaterProblemType: data.stormwaterProblemDetails?.stormwaterProblemType || null,
+          causeOfClog: data.stormwaterProblemDetails?.causeOfClog || null,
+        };
+      }
+
+      return marker;
     });
 
     res.status(200).json(markers); // Send the fetched markers as JSON
@@ -91,28 +124,79 @@ const getAllMarkers = async (req, res) => {
   }
 };
 
-//Save Marker
+
 const saveMarker = async (req, res) => {
-  const { title, description, position } = req.body;
-
-  // Ensure required fields are present
-  if (!title || !description || !position || !position.latitude || !position.longitude) {
-    return res.status(400).send({ msg: "Title, description, and position (latitude & longitude) are required" });
-  }
-
-  // Prepare marker data
-  const markerData = {
-    title,
-    description,
-    position: new firebase.firestore.GeoPoint(position.latitude, position.longitude), // Firestore GeoPoint for position
-    createdAt: firebase.firestore.FieldValue.serverTimestamp() // Store the creation time
-  };
-
   try {
-    // Save markerData to the 'Markers' collection in Firestore
-    const docRef = await Markers.add(markerData); // Save the document to Firestore
-    res.send({ msg: "Marker Saved", id: docRef.id }); // Send back the document ID
+    // Parse the location from the request body
+    const { 
+      formType, moodNotes, date, notes, 
+      typeOfDumping, locationOfDumping, amountOfDumping, 
+      weatherCondition, standingWaterLocation, presenceOfMold, 
+      stormwaterProblemLocation, stormwaterProblemType, causeOfClog 
+    } = req.body;
+
+    const location = req.body.location ? JSON.parse(req.body.location) : null;
+    if (!formType || !location || !location.latitude || !location.longitude) {
+      return res.status(400).send({ msg: "Form type and location (latitude & longitude) are required" });
+    }
+
+    // Prepare base marker data
+    const markerData = {
+      formType,
+      location: new firebase.firestore.GeoPoint(location.latitude, location.longitude),
+      moodNotes: moodNotes || null,
+      date: date || firebase.firestore.FieldValue.serverTimestamp(),
+      notes: notes || null,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    };
+
+    // Add form-specific details
+    if (formType === 'Dumping') {
+      markerData.dumpingDetails = { typeOfDumping, locationOfDumping, amountOfDumping };
+    } else if (formType === 'StandingWater') {
+      markerData.standingWaterDetails = { weatherCondition, standingWaterLocation, presenceOfMold };
+    } else if (formType === 'Stormwater') {
+      markerData.stormwaterProblemDetails = { stormwaterProblemLocation, stormwaterProblemType, causeOfClog };
+    }
+
+    // Upload images to Firebase Storage
+    if (req.files && req.files.length > 0) {
+      const imageUrls = await Promise.all(
+        req.files.map((file, index) => {
+          const imageRef = storage.bucket().file(`markers/${Date.now()}_${index}_${file.originalname}`);
+
+          // Create a stream to upload the file
+          const bufferStream = new Readable();
+          bufferStream.push(file.buffer);
+          bufferStream.push(null); // End the stream
+
+          return new Promise((resolve, reject) => {
+            bufferStream
+              .pipe(imageRef.createWriteStream({ contentType: file.mimetype }))
+              .on('finish', async () => {
+                try {
+                  const publicUrl = await imageRef.getSignedUrl({
+                    action: 'read',
+                    expires: '03-01-2500', // Adjust as needed
+                  });
+                  resolve(publicUrl[0]); // Get the public URL
+                } catch (error) {
+                  reject(error);
+                }
+              })
+              .on('error', (error) => reject(error));
+          });
+        })
+      );
+
+      markerData.images = imageUrls; // Attach image URLs to marker data
+    }
+
+    // Save marker data to Firestore
+    const docRef = await Markers.add(markerData);
+    res.status(201).send({ msg: "Marker Saved", id: docRef.id });
   } catch (error) {
+    console.error("Error saving marker:", error);
     res.status(500).send({ msg: "Failed to save marker", error: error.message });
   }
 };
