@@ -129,39 +129,90 @@ const getAllMarkers = async (req, res) => {
 
 const saveMarker = async (req, res) => {
   try {
-    const { location, formType, notes } = req.body;
+    const {
+      location: locationString, // Location as JSON string from frontend
+      formType,
+      moodNotes,
+      date,
+      notes,
+      typeOfDumping,
+      locationOfDumping,
+      amountOfDumping,
+      weatherCondition,
+      standingWaterLocation,
+      presenceOfMold,
+      stormwaterProblemLocation,
+      stormwaterProblemType,
+      causeOfClog,
+    } = req.body;
 
-    if (!location || !formType) {
-      return res.status(400).send({ msg: "Location and form type are required" });
+    // Parse location from the request body
+    const location = locationString ? JSON.parse(locationString) : null;
+    if (!location || !location.latitude || !location.longitude || !formType) {
+      return res.status(400).send({ msg: "Location (latitude, longitude) and form type are required" });
     }
 
     // Initialize marker data
     const markerData = {
-      location,
+      location: new admin.firestore.GeoPoint(location.latitude, location.longitude),
       formType,
-      notes,
+      moodNotes: moodNotes || null,
+      date: date || admin.firestore.FieldValue.serverTimestamp(),
+      notes: notes || null,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     };
 
-    // Upload images
+    // Handle form-specific details
+    if (formType === 'Dumping') {
+      markerData.dumpingDetails = {
+        typeOfDumping: typeOfDumping || null,
+        locationOfDumping: locationOfDumping || null,
+        amountOfDumping: amountOfDumping || null,
+      };
+    } else if (formType === 'StandingWater') {
+      markerData.standingWaterDetails = {
+        weatherCondition: weatherCondition || null,
+        standingWaterLocation: standingWaterLocation || null,
+        presenceOfMold: presenceOfMold || null,
+      };
+    } else if (formType === 'Stormwater') {
+      markerData.stormwaterProblemDetails = {
+        stormwaterProblemLocation: stormwaterProblemLocation || null,
+        stormwaterProblemType: stormwaterProblemType || null,
+        causeOfClog: causeOfClog || null,
+      };
+    }
+
+    // Handle image uploads
     const uploadedImages = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
-        const bucket = admin.storage().bucket('gmail-api-test-427120.firebasestorage.app');        const fileName = `markers/${Date.now()}_${file.originalname}`;
-        const fileUpload = bucket.file(fileName);
+        try {
+          const bucket = admin.storage().bucket(); // Use default bucket
+          const fileName = `markers/${Date.now()}_${file.originalname}`;
+          const fileUpload = bucket.file(fileName);
 
-        await fileUpload.save(file.buffer, {
-          metadata: { contentType: file.mimetype },
-        });
+          // Save the file to Firebase Storage
+          await fileUpload.save(file.buffer, {
+            metadata: { contentType: file.mimetype },
+          });
 
-        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
-        uploadedImages.push(publicUrl);
+          // Generate public URL
+          const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+          uploadedImages.push(publicUrl);
+        } catch (err) {
+          console.error("Error uploading image:", err);
+          return res.status(500).send({ msg: "Failed to upload images", error: err.message });
+        }
       }
     }
 
-    markerData.images = uploadedImages;
+    // Attach uploaded images to marker data
+    if (uploadedImages.length > 0) {
+      markerData.images = uploadedImages;
+    }
 
-    // Save marker to Firestore
+    // Save marker data to Firestore
     const docRef = await Markers.add(markerData);
     res.status(201).send({ msg: "Marker Saved", id: docRef.id });
   } catch (error) {
