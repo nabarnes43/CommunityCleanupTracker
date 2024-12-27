@@ -46,26 +46,26 @@ const Home = () => {
     useEffect(() => {
       const fetchMarkers = async () => {
         try {
-          const response = await fetch('http://localhost:4000/user/markers', {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-  
+          const response = await fetch('http://localhost:4000/user/markers');
           if (response.ok) {
             const data = await response.json();
-            setMarkers(data); // Update markers state with fetched data
+            console.log('Fetched markers:', data); // Debug log
+            if (!Array.isArray(data)) {
+              console.error('Expected array of markers, got:', typeof data);
+              return;
+            }
+            setMarkers(data);
           } else {
-            console.error('Error fetching markers:', await response.json());
+            const errorData = await response.json();
+            console.error('Error fetching markers:', errorData);
           }
         } catch (error) {
-          console.error('Error:', error);
+          console.error('Fetch error:', error);
         }
       };
-  
-      fetchMarkers(); // Trigger the fetch when the component mounts
-    }, []); // Empty dependency array ensures this runs only once
+    
+      fetchMarkers();
+    }, []);
 
 
     // Custom component to move the map to the user's location
@@ -218,41 +218,45 @@ const Home = () => {
     const map = useMap();
   
     useEffect(() => {
-      // Custom function to create cluster icons
-      const createCustomClusterIcon = (cluster) => {
-        return L.divIcon({
-          html: `<div class="custom-cluster-icon">${cluster.getChildCount()}</div>`,
-          className: 'marker-cluster-custom', // Custom class for further styling
-          iconSize: L.point(40, 40, true) // Size of the cluster icon
-        });
-      };
-  
       const markerClusterGroup = L.markerClusterGroup({
-        iconCreateFunction: createCustomClusterIcon
+        iconCreateFunction: (cluster) => {
+          return L.divIcon({
+            html: `<div class="custom-cluster-icon">${cluster.getChildCount()}</div>`,
+            className: 'marker-cluster-custom',
+            iconSize: L.point(40, 40, true)
+          });
+        }
       });
-      
-      if (markers) {
-        // Add markers to the cluster group
+  
+      if (markers && markers.length > 0) {
         markers.forEach(marker => {
-          // Check if `location` exists and is a valid array with two numbers (latitude, longitude)
-          if (marker.location) {
-            L.marker(marker.location, { icon: customIcon }) // Use `location` array directly
-              .bindPopup(`<b>${marker.title}</b><br/>${marker.description}`) // Include both title and description
+          if (marker.location && Array.isArray(marker.location) && marker.location.length === 2) {
+            const popupContent = `
+              <div class="map-popup">
+                <h3>${marker.formType || 'Unknown Type'}</h3>
+                ${marker.notes ? `<p>${marker.notes}</p>` : ''}
+                ${marker.date ? `<p>Date: ${new Date(marker.date).toLocaleDateString()}</p>` : ''}
+                ${marker.moodNotes ? `<p>Mood Notes: ${marker.moodNotes}</p>` : ''}
+              </div>
+            `;
+  
+            L.marker(marker.location, { icon: customIcon })
+              .bindPopup(popupContent)
               .addTo(markerClusterGroup);
           } else {
-            console.warn(`Invalid marker data:`, marker);
+            console.warn('Invalid marker data:', marker);
           }
         });
-
-      } else {
-        console.warn(`Invalid markers:`, markers);
+  
+        map.addLayer(markerClusterGroup);
       }
-      map.addLayer(markerClusterGroup);
   
       return () => {
-        map.removeLayer(markerClusterGroup);
+        if (map.hasLayer(markerClusterGroup)) {
+          map.removeLayer(markerClusterGroup);
+        }
       };
-    }, [map]);
+    }, [map, markers]);
   
     return null;
   };

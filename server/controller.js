@@ -80,45 +80,37 @@ const deleteUser = async (req, res) => {
 // Function to fetch all markers from Firestore
 const getAllMarkers = async (req, res) => {
   try {
-    // Fetch all documents in the 'Markers' collection
     const snapshot = await Markers.get();
-
-    // Map through the documents to transform the data
+    
     const markers = snapshot.docs.map((doc) => {
       const data = doc.data();
       const marker = {
-        location: [data.location.latitude, data.location.longitude], // Convert Firestore GeoPoint to location array
+        id: doc.id,
+        location: [data.location.latitude, data.location.longitude],
+        title: `${data.formType} Report`, // Add a title
+        description: data.notes || 'No description provided', // Use notes as description
         moodNotes: data.moodNotes || null,
-        date: data.date instanceof admin.firestore.Timestamp ? data.date.toDate() : data.date || null, // Safely convert Firestore timestamp
-        notes: data.notes || null,
+        images: data.images || [], // Include the image URLs array
+        date: data.date instanceof admin.firestore.Timestamp ? data.date.toDate() : data.date || null,
         formType: data.formType || null,
+        details: {} // Store form-specific details
       };
 
-      // Add fields based on formType
+      // Add form-specific details
       if (data.formType === "Dumping") {
-        marker.dumpingDetails = {
-          typeOfDumping: data.dumpingDetails?.typeOfDumping || null,
-          locationOfDumping: data.dumpingDetails?.locationOfDumping || null,
-          amountOfDumping: data.dumpingDetails?.amountOfDumping || null,
-        };
+        marker.details = data.dumpingDetails || {};
+        marker.description = `Type: ${data.dumpingDetails?.typeOfDumping || 'N/A'}\nLocation: ${data.dumpingDetails?.locationOfDumping || 'N/A'}\nAmount: ${data.dumpingDetails?.amountOfDumping || 'N/A'}\n${marker.description}`;
       } else if (data.formType === "StandingWater") {
-        marker.standingWaterDetails = {
-          weatherCondition: data.standingWaterDetails?.weatherCondition || null,
-          standingWaterLocation: data.standingWaterDetails?.standingWaterLocation || null,
-          presenceOfMold: data.standingWaterDetails?.presenceOfMold || null,
-        };
+        marker.details = data.standingWaterDetails || {};
+        marker.description = `Weather: ${data.standingWaterDetails?.weatherCondition || 'N/A'}\nLocation: ${data.standingWaterDetails?.standingWaterLocation || 'N/A'}\nMold: ${data.standingWaterDetails?.presenceOfMold || 'N/A'}\n${marker.description}`;
       } else if (data.formType === "Stormwater") {
-        marker.stormwaterProblemDetails = {
-          stormwaterProblemLocation: data.stormwaterProblemDetails?.stormwaterProblemLocation || null,
-          stormwaterProblemType: data.stormwaterProblemDetails?.stormwaterProblemType || null,
-          causeOfClog: data.stormwaterProblemDetails?.causeOfClog || null,
-        };
+        marker.details = data.stormwaterProblemDetails || {};
+        marker.description = `Location: ${data.stormwaterProblemDetails?.stormwaterProblemLocation || 'N/A'}\nProblem: ${data.stormwaterProblemDetails?.stormwaterProblemType || 'N/A'}\nCause: ${data.stormwaterProblemDetails?.causeOfClog || 'N/A'}\n${marker.description}`;
       }
 
       return marker;
     });
 
-    // Respond with the transformed marker data
     res.status(200).json(markers);
   } catch (error) {
     console.error("Error fetching markers:", error);
