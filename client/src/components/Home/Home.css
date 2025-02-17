@@ -15,7 +15,8 @@
     border: 5px solid #000000; /* Adds a border around the map */
   }
   
-  .location-button {
+
+.location-button {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -34,6 +35,39 @@
   .map-popup {
     font-size: 16px;
     color: black;
+    max-width: 300px;
+  }
+  
+  .map-popup h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+  }
+  
+  .map-popup p {
+    margin: 5px 0;
+  }
+  
+  .map-container {
+    height: 90vh;
+    width: 100%;
+    z-index: 1;
+  }
+  .popup-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+    justify-content: center;
+  }
+  
+  .popup-images img {
+    border-radius: 4px;
+    transition: transform 0.2s;
+    cursor: pointer;
+  }
+  
+  .popup-images img:hover {
+    transform: scale(1.05);
   }
 
   /* Custom cluster icon styling */

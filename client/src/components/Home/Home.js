@@ -216,7 +216,6 @@ const Home = () => {
 
   const MarkerClusterComponent = () => {
     const map = useMap();
-  
     useEffect(() => {
       const markerClusterGroup = L.markerClusterGroup({
         iconCreateFunction: (cluster) => {
@@ -231,12 +230,21 @@ const Home = () => {
       if (markers && markers.length > 0) {
         markers.forEach(marker => {
           if (marker.location && Array.isArray(marker.location) && marker.location.length === 2) {
+            // Add images section to popup content
+            const imagesHtml = marker.images?.length > 0 
+              ? `<div class="popup-images">
+                  ${marker.images.map(url => `<img src="${url}" alt="Site" style="width: 100px; height: 100px; object-fit: cover; margin: 2px;"/>`).join('')}
+                 </div>`
+              : '';
+            console.log('Marker data:', marker); // Add to MarkerClusterComponent
+
             const popupContent = `
               <div class="map-popup">
                 <h3>${marker.formType || 'Unknown Type'}</h3>
                 ${marker.notes ? `<p>${marker.notes}</p>` : ''}
                 ${marker.date ? `<p>Date: ${new Date(marker.date).toLocaleDateString()}</p>` : ''}
                 ${marker.moodNotes ? `<p>Mood Notes: ${marker.moodNotes}</p>` : ''}
+                ${imagesHtml}
               </div>
             `;
   

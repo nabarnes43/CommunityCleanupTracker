@@ -191,7 +191,12 @@ const saveMarker = async (req, res) => {
 
           // Generate public URL
           const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+
+          // Make the file publicly accessible
+          await fileUpload.makePublic();
           uploadedImages.push(publicUrl);
+
+          console.log(`File uploaded successfully: ${fileName}`);
         } catch (err) {
           console.error("Error uploading image:", err);
           return res.status(500).send({ msg: "Failed to upload images", error: err.message });
