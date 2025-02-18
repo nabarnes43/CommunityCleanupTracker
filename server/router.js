@@ -26,15 +26,24 @@ router.get('/api', apiTest);
 //Markers
 router.get('/markers', getAllMarkers);
 //router.post('/createMarker', saveMarker);
-router.post('/createMarker', upload.array('images', 5), async (req, res) => {
-  console.log('Incoming Body:', req.body); // Log parsed body
-  console.log('Incoming Files:', req.files); // Log uploaded files
+router.post('/createMarker', upload.fields([
+  { name: 'images', maxCount: 5 },
+  { name: 'videos', maxCount: 2 }
+]), async (req, res) => {
+  console.log('Incoming Body:', req.body); // Log form fields
+  console.log('Incoming Files:', {
+      images: req.files?.images || [],
+      videos: req.files?.videos || []
+  }); // Log uploaded files in a cleaner format
 
   try {
-    await saveMarker(req, res);
+      await saveMarker(req, res);
   } catch (error) {
-    console.error('Error handling createMarker:', error);
-    res.status(500).send({ msg: 'Failed to save marker', error: error.message });
+      console.error('Error handling createMarker:', error);
+      res.status(500).send({ 
+          msg: 'Failed to save marker', 
+          error: error.message 
+      });
   }
 });
 

@@ -70,6 +70,43 @@
     transform: scale(1.05);
   }
 
+  .popup-videos {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.popup-videos video {
+  max-width: 100%;
+  border-radius: 4px;
+  background: #000;
+}
+
+/* Ensure popup is wide enough for videos */
+.leaflet-popup-content {
+  overflow-y: auto;
+  min-width: 220px;
+  max-width: 300px;
+}
+
+.map-popup {
+  max-width: 300px;
+}
+
+.popup-images, .popup-videos {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.video-container {
+  width: 100%;
+  margin-top: 8px;
+}
+
   /* Custom cluster icon styling */
 .marker-cluster-custom {
   background-color: #000; /* Black background */

@@ -118,11 +118,10 @@ const getAllMarkers = async (req, res) => {
   }
 };
 
-
 const saveMarker = async (req, res) => {
   try {
     const {
-      location: locationString, // Location as JSON string from frontend
+      location: locationString,
       formType,
       moodNotes,
       date,
@@ -175,50 +174,105 @@ const saveMarker = async (req, res) => {
       };
     }
 
-    // Handle image uploads
-    const uploadedImages = [];
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
+    // Initialize arrays for uploaded file URLs
+    const uploadedFiles = {
+      images: [],
+      videos: []
+    };
+
+    // Process images
+    if (req.files?.images && req.files.images.length > 0) {
+      console.log('Processing images:', req.files.images.length);
+      
+      for (const file of req.files.images) {
         try {
-          const bucket = admin.storage().bucket(); // Use default bucket
-          const fileName = `markers/${Date.now()}_${file.originalname}`;
+          const bucket = admin.storage().bucket();
+          const fileName = `markers/images/${Date.now()}_${file.originalname}`;
           const fileUpload = bucket.file(fileName);
 
-          // Save the file to Firebase Storage
+          // Upload the file
           await fileUpload.save(file.buffer, {
-            metadata: { contentType: file.mimetype },
+            metadata: { 
+              contentType: file.mimetype,
+              metadata: {
+                fileType: 'image'
+              }
+            },
           });
 
-          // Generate public URL
-          const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
-
-          // Make the file publicly accessible
+          // Make the file public
           await fileUpload.makePublic();
-          uploadedImages.push(publicUrl);
 
-          console.log(`File uploaded successfully: ${fileName}`);
+          // Generate and store the public URL
+          const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+          uploadedFiles.images.push(publicUrl);
+          
+          console.log(`Image uploaded successfully: ${fileName}`);
         } catch (err) {
-          console.error("Error uploading image:", err);
-          return res.status(500).send({ msg: "Failed to upload images", error: err.message });
+          console.error('Error uploading image:', err);
+          return res.status(500).send({ msg: "Failed to upload image", error: err.message });
         }
       }
     }
 
-    // Attach uploaded images to marker data
-    if (uploadedImages.length > 0) {
-      markerData.images = uploadedImages;
+    // Process videos
+    if (req.files?.videos && req.files.videos.length > 0) {
+      console.log('Processing videos:', req.files.videos.length);
+      
+      for (const file of req.files.videos) {
+        try {
+          const bucket = admin.storage().bucket();
+          const fileName = `markers/videos/${Date.now()}_${file.originalname}`;
+          const fileUpload = bucket.file(fileName);
+
+          // Upload the file
+          await fileUpload.save(file.buffer, {
+            metadata: { 
+              contentType: file.mimetype,
+              metadata: {
+                fileType: 'video'
+              }
+            },
+          });
+
+          // Make the file public
+          await fileUpload.makePublic();
+
+          // Generate and store the public URL
+          const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+          uploadedFiles.videos.push(publicUrl);
+          
+          console.log(`Video uploaded successfully: ${fileName}`);
+        } catch (err) {
+          console.error('Error uploading video:', err);
+          return res.status(500).send({ msg: "Failed to upload video", error: err.message });
+        }
+      }
     }
 
-    // Save marker data to Firestore
+    // Add the uploaded file URLs to the marker data
+    if (uploadedFiles.images.length > 0) {
+      markerData.images = uploadedFiles.images;
+    }
+    if (uploadedFiles.videos.length > 0) {
+      markerData.videos = uploadedFiles.videos;
+    }
+
+    console.log("Final marker data before save:", markerData);
+
+    // Save to Firestore
     const docRef = await Markers.add(markerData);
-    res.status(201).send({ msg: "Marker Saved", id: docRef.id });
+    
+    res.status(201).send({ 
+      msg: "Marker Saved", 
+      id: docRef.id,
+      uploadedFiles // Include uploaded files in response for verification
+    });
   } catch (error) {
-    console.error("Error saving marker:", error);
+    console.error("Error in saveMarker:", error);
     res.status(500).send({ msg: "Failed to save marker", error: error.message });
   }
 };
-
-
 
 async function sendMail(req, res) {
     try{

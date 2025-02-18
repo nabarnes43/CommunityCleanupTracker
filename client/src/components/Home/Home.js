@@ -101,122 +101,50 @@ const Home = () => {
     }
   };
 
-  // const handleFormSubmit = async (e) => {
-  //   e.preventDefault();
-  //   if (userLocation) {
-  //     const newMarker = {
-  //       position: userLocation,
-  //       popUp: formData.title,
-  //       description: formData.description
-  //     };
-  //     setMarkers([...markers, newMarker]);
-  //     setFormData({ title: '', description: '' }); // Reset form
-  //     setShowForm(false); // Hide the form after submission
-      
-  //     // Next, create the newMarker object with position, title, and description
-  //     const savedMarker = {
-  //       title: formData.title,          // Marker title or popup text
-  //       description: formData.description, // Marker description
-  //       position : {
-  //         latitude: userLocation[0],  // Access latitude from the array
-  //         longitude: userLocation[1]  // Access longitude from the array
-  //       }             // Attach the position object
-  //     };
-      
-  //     // NEW: Send the marker to the backend
-  //     try {
-  //       const response = await fetch('http://localhost:4000/user/createMarker', {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //         body: JSON.stringify(savedMarker),
-  //       });
+const handleFormSubmit = async (formData) => {
+  console.log('Home Form submitted'); 
+  
+  // Debug log the incoming FormData contents
+  for (let pair of formData.entries()) {
+    console.log('Incoming form data:', pair[0], pair[1]);
+  }
 
-  //       if (response.ok) {
-  //         console.log('Marker saved successfully!');
-  //       } else {
-  //         console.error('Error saving marker:', await response.json());
-  //       }
-  //     } catch (error) {
-  //       console.error('Error:', error);
-  //     }
-  //   }
-  // };
+  if (userLocation) {
+    // Since we already have a FormData object, we should use it directly
+    // First, let's add the location data
+    formData.append('location', JSON.stringify({
+      latitude: userLocation[0],
+      longitude: userLocation[1],
+    }));
 
-  const handleFormSubmit = async (formData) => {
-    console.log('Home Form submitted', formData); // Log to confirm form submission
-  
-    if (userLocation) {
-      const formDataPayload = new FormData();
-  
-      // Append location as a JSON string
-      formDataPayload.append('location', JSON.stringify({
-        latitude: userLocation[0],
-        longitude: userLocation[1],
-      }));
-  
-      // Append form type
-      formDataPayload.append('formType', formData.formType);
-  
-      // Append form-specific fields
-      if (formData.formType === 'Dumping') {
-        formDataPayload.append('typeOfDumping', formData.typeOfDumping);
-        formDataPayload.append('locationOfDumping', formData.locationOfDumping);
-        formDataPayload.append('amountOfDumping', formData.amountOfDumping);
-      } else if (formData.formType === 'StandingWater') {
-        formDataPayload.append('weatherCondition', formData.weatherCondition);
-        formDataPayload.append('standingWaterLocation', formData.standingWaterLocation);
-        formDataPayload.append('presenceOfMold', formData.presenceOfMold);
-      } else if (formData.formType === 'Stormwater') {
-        formDataPayload.append('stormwaterProblemLocation', formData.stormwaterProblemLocation);
-        formDataPayload.append('stormwaterProblemType', formData.stormwaterProblemType);
-        formDataPayload.append('causeOfClog', formData.causeOfClog);
+    try {
+      // We can now send the FormData directly to the backend
+      const response = await fetch('http://localhost:4000/user/createMarker', {
+        method: 'POST',
+        body: formData, // Using the original FormData object
+      });
+
+      if (response.ok) {
+        console.log('Marker saved successfully!');
+        setShowForm(false); // Close the form on success
+      } else {
+        const errorResponse = await response.json();
+        console.error('Error saving marker:', errorResponse);
       }
-  
-      // Append other common fields
-      formDataPayload.append('moodNotes', formData.moodNotes);
-      formDataPayload.append('notes', formData.notes);
-      formDataPayload.append('date', formData.date);
-  
-      // Append images (files)
-      if (formData.images && formData.images.length > 0) {
-        formData.images.forEach((image) => {
-          formDataPayload.append('images', image); // Append each file individually
-        });
-      }
-  
-      // Send the form data as a POST request to the backend
-      try {
-        const response = await fetch('http://localhost:4000/user/createMarker', {
-          method: 'POST',
-          body: formDataPayload, // Send FormData directly
-        });
-  
-        if (response.ok) {
-          console.log('Marker saved successfully!');
-        } else {
-          const errorResponse = await response.json();
-          console.error('Error saving marker:', errorResponse);
-        }
-      } catch (error) {
-        console.error('Error:', error);
-      }
+    } catch (error) {
+      console.error('Error:', error);
     }
-  };
+  } else {
+    console.error('User location not available');
+  }
+};
   
-
-  // const handleInputChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setFormData({
-  //     ...formData,
-  //     [name]: value
-  //   });
-  // };
-
+  //TODO comment cleanup
   const MarkerClusterComponent = () => {
     const map = useMap();
+    
     useEffect(() => {
+      // Create a cluster group with custom icon styling
       const markerClusterGroup = L.markerClusterGroup({
         iconCreateFunction: (cluster) => {
           return L.divIcon({
@@ -227,38 +155,82 @@ const Home = () => {
         }
       });
   
-      if (markers && markers.length > 0) {
-        markers.forEach(marker => {
-          if (marker.location && Array.isArray(marker.location) && marker.location.length === 2) {
-            // Add images section to popup content
-            const imagesHtml = marker.images?.length > 0 
-              ? `<div class="popup-images">
-                  ${marker.images.map(url => `<img src="${url}" alt="Site" style="width: 100px; height: 100px; object-fit: cover; margin: 2px;"/>`).join('')}
-                 </div>`
-              : '';
-            console.log('Marker data:', marker); // Add to MarkerClusterComponent
+      // Helper function to create image HTML - separated for clarity
+      const createImagesSection = (images) => {
+        if (!images?.length) return '';
+        return `
+          <div class="popup-images">
+            ${images.map(url => `
+              <a href="${url}" target="_blank">
+                <img 
+                  src="${url}" 
+                  alt="Site" 
+                  style="width: 100px; height: 100px; object-fit: cover; margin: 2px; border-radius: 4px;"
+                  onerror="this.onerror=null; this.src='placeholder.jpg';"
+                />
+              </a>
+            `).join('')}
+          </div>
+        `;
+      };
 
+      // Helper function to create video HTML - separated for clarity
+      const createVideosSection = (videos) => {
+        if (!videos?.length) return '';
+        return `
+          <div class="popup-videos">
+            ${videos.map(url => `
+              <div class="video-container">
+                <video 
+                  controls 
+                  width="200" 
+                  style="margin: 2px; border-radius: 4px;"
+                  preload="metadata"
+                >
+                  <source src="${url}" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      };
+
+      // Process markers if they exist
+      if (markers?.length > 0) {
+        markers.forEach(marker => {
+          // Validate marker location
+          if (marker.location?.length === 2) {
+            // Create the complete popup content by combining all sections
             const popupContent = `
               <div class="map-popup">
                 <h3>${marker.formType || 'Unknown Type'}</h3>
-                ${marker.notes ? `<p>${marker.notes}</p>` : ''}
-                ${marker.date ? `<p>Date: ${new Date(marker.date).toLocaleDateString()}</p>` : ''}
-                ${marker.moodNotes ? `<p>Mood Notes: ${marker.moodNotes}</p>` : ''}
-                ${imagesHtml}
+                ${marker.notes ? `<p><strong>Notes:</strong> ${marker.notes}</p>` : ''}
+                ${marker.date ? `<p><strong>Date:</strong> ${new Date(marker.date).toLocaleDateString()}</p>` : ''}
+                ${marker.moodNotes ? `<p><strong>Mood Notes:</strong> ${marker.moodNotes}</p>` : ''}
+                ${createImagesSection(marker.images)}
+                ${createVideosSection(marker.videos)}
               </div>
             `;
   
+            // Create and add the marker to the cluster group
             L.marker(marker.location, { icon: customIcon })
-              .bindPopup(popupContent)
+              .bindPopup(popupContent, {
+                maxWidth: 300,
+                maxHeight: 400,
+                autoPanPadding: [50, 50]
+              })
               .addTo(markerClusterGroup);
           } else {
-            console.warn('Invalid marker data:', marker);
+            console.warn('Invalid marker location:', marker);
           }
         });
   
+        // Add the cluster group to the map
         map.addLayer(markerClusterGroup);
       }
   
+      // Cleanup function
       return () => {
         if (map.hasLayer(markerClusterGroup)) {
           map.removeLayer(markerClusterGroup);
@@ -267,35 +239,15 @@ const Home = () => {
     }, [map, markers]);
   
     return null;
-  };
+};
 
+  //TODO Split this into seperate components maybe
   return (
     <div className="container">
 
       <button className="location-button" onClick={handleLocateUser}>
         Drop Pin at My Location
       </button>
-
-      {/* {showForm && (
-        <form className="pin-form" onSubmit={handleFormSubmit}>
-          <input
-            type="text"
-            name="title"
-            placeholder="Title"
-            value={formData.title}
-            onChange={handleInputChange}
-            required
-          />
-          <textarea
-            name="description"
-            placeholder="Description"
-            value={formData.description}
-            onChange={handleInputChange}
-            required
-          />
-          <button type="submit">Add Pin</button>
-        </form>
-      )} */}
 
       {/* Display the PinDataForm as a modal if showForm is true */}
       {showForm && (

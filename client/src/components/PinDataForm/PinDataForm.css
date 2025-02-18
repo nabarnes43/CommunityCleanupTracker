@@ -57,14 +57,6 @@
     margin-top: 10px;
   }
   
-  .image-thumbnail {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-  }
-  
   
   .pin-form button[type="submit"] {
     background-color: #007bff;
@@ -93,3 +85,35 @@
     background-color: #5a6268;
   }
   
+  .file-upload-section {
+    margin: 15px 0;
+  }
+  
+  .upload-group {
+    margin-bottom: 20px;
+  }
+  
+  .preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .preview-item {
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .image-thumbnail {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+  }
+  
+  .video-thumbnail {
+    max-width: 200px;
+    border-radius: 4px;
+  }
