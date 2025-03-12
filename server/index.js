@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(cors());
 
 // Use user routes
-app.use('/user', routes); // All routes under '/api' will be handled by userRoutes
+app.use('/user', routes); 
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {

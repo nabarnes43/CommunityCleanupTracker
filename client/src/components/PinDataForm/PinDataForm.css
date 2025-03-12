@@ -1,0 +1,119 @@
+/* Modal Background */
+.modal {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000; /* Ensures it appears above other elements */
+
+  }
+
+  /* Form Styling */
+  .pin-form {
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+    height: 50%;
+    overflow-y: auto; /* Enables scrolling if content overflows */
+  } 
+  
+  .pin-form h3 {
+    margin-top: 0;
+  }
+
+  .pin-form h4 {
+    margin: 0;
+  }
+  
+/* Set default height and allow it to grow */
+.pin-form textarea[name="notes"] {
+    min-height: 150px; /* Minimum height */
+    max-height: 400px; 
+    height: auto; /* Set height to auto for better content-based resizing */
+    overflow-y: auto; /* Enable scrolling if content exceeds max-height */
+  }
+
+  .pin-form textarea[name="moodNotes"] {
+    min-height: 75px; /* Minimum height */
+    max-height: 150px; 
+    height: auto; /* Set height to auto for better content-based resizing */
+    overflow-y: auto; /* Enable scrolling if content exceeds max-height */
+  }
+
+  .pin-form input,
+  .pin-form select {
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+
+  .image-preview {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  
+  .pin-form button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .pin-form button[type="button"] {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 5px;
+  }
+  
+  .pin-form button[type="submit"]:hover {
+    background-color: #0056b3;
+  }
+  
+  .pin-form button[type="button"]:hover {
+    background-color: #5a6268;
+  }
+  
+  .file-upload-section {
+    margin: 15px 0;
+  }
+  
+  .upload-group {
+    margin-bottom: 20px;
+  }
+  
+  .preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .preview-item {
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .image-thumbnail {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+  }
+  
+  .video-thumbnail {
+    max-width: 200px;
+    border-radius: 4px;
+  }
