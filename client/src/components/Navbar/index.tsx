@@ -1,9 +1,13 @@
-// src/components/Navbar.js
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './Navbar.css'; // Import CSS
+import './Navbar.css';
 
-const Navbar = () => {
+/**
+ * Navigation bar component that provides links to different sections of the application
+ * 
+ * @returns {JSX.Element} The rendered Navbar component
+ */
+const Navbar: React.FC = () => {
   return (
     <nav className="navbar">
       <ul className="navbar-list">
@@ -18,4 +22,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default Navbar; 
