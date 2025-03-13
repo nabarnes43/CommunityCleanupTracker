@@ -5,7 +5,7 @@ function DeleteUser() {
 
   const handleDeleteUser = async () => {
     try {
-      const response = await fetch('/user/delete', {
+      const response = await fetch('/delete', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -46,7 +46,7 @@ const Home = () => {
     useEffect(() => {
       const fetchMarkers = async () => {
         try {
-          const response = await fetch('http://localhost:4000/user/markers');
+          const response = await fetch('http://localhost:4000/markers');
           if (response.ok) {
             const data = await response.json();
             console.log('Fetched markers:', data); // Debug log
@@ -119,7 +119,7 @@ const handleFormSubmit = async (formData) => {
 
     try {
       // We can now send the FormData directly to the backend
-      const response = await fetch('http://localhost:4000/user/createMarker', {
+      const response = await fetch('http://localhost:4000/markers/create', {
         method: 'POST',
         body: formData, // Using the original FormData object
       });

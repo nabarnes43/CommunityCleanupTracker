@@ -1,0 +1,104 @@
+POST https://example.com/comments HTTP/1.1
+content-type: application/json
+
+{
+    "name": "sample",
+    "time": "Wed, 21 Oct 2015 18:27:50 GMT"
+}
+
+### API Test Endpoint
+GET http://localhost:4000/api HTTP/1.1
+
+### ==================== MARKER ENDPOINTS ====================
+
+### Get All Markers
+GET http://localhost:4000/markers HTTP/1.1
+
+### Create New Marker (Dumping)
+# Note: This is a simplified version since file uploads can't be tested directly in Rest.http
+POST http://localhost:4000/markers/create HTTP/1.1
+Content-Type: application/json
+
+{
+  "location": "{\"latitude\": 33.7490, \"longitude\": -84.3880}",
+  "formType": "Dumping",
+  "notes": "Large pile of construction debris",
+  "moodNotes": "Concerned about environmental impact",
+  "typeOfDumping": "Construction",
+  "locationOfDumping": "Roadside",
+  "amountOfDumping": "Large"
+}
+
+### Create New Marker (Standing Water)
+POST http://localhost:4000/markers/create HTTP/1.1
+Content-Type: application/json
+
+{
+  "location": "{\"latitude\": 33.7491, \"longitude\": -84.3881}",
+  "formType": "StandingWater",
+  "notes": "Water pooling after recent rain",
+  "moodNotes": "Worried about mosquitoes",
+  "weatherCondition": "After Rain",
+  "standingWaterLocation": "Street Corner",
+  "presenceOfMold": "No"
+}
+
+### Create New Marker (Stormwater Problem)
+POST http://localhost:4000/markers/create HTTP/1.1
+Content-Type: application/json
+
+{
+  "location": "{\"latitude\": 33.7492, \"longitude\": -84.3882}",
+  "formType": "Stormwater",
+  "notes": "Drain completely blocked",
+  "moodNotes": "Frustrated with flooding",
+  "stormwaterProblemLocation": "Street Drain",
+  "stormwaterProblemType": "Clogged Drain",
+  "causeOfClog": "Leaves and Debris"
+}
+
+### ==================== USER ENDPOINTS ====================
+
+### Get All Users
+GET http://localhost:4000/users HTTP/1.1
+
+### Create New User
+POST http://localhost:4000/users/create HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Jane Doe",
+  "college": "Georgia Tech",
+  "age": 22
+}
+
+### Update Existing User
+POST http://localhost:4000/users/update HTTP/1.1
+Content-Type: application/json
+
+{
+  "id": "USER_ID_HERE",
+  "name": "Jane Smith",
+  "college": "Georgia State University"
+}
+
+### Delete User
+POST http://localhost:4000/users/delete HTTP/1.1
+Content-Type: application/json
+
+{
+  "id": "USER_ID_HERE"
+}
+
+### ==================== EMAIL ENDPOINTS ====================
+
+### Send Test Email
+GET http://localhost:4000/email/send HTTP/1.1
+
+### Get Emails for Specific Address
+GET http://localhost:4000/email/list/test@example.com HTTP/1.1
+
+### ==================== INVALID ROUTE TEST ====================
+
+### Test Invalid Route (to reproduce "unknown" error)
+GET http://localhost:4000/user/markers HTTP/1.1

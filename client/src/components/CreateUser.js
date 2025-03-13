@@ -7,7 +7,7 @@ function CreateUser() {
 
   const handleCreateUser = async () => {
     try {
-      const response = await fetch('/user/create', {
+      const response = await fetch('/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

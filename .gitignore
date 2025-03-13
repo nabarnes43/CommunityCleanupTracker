@@ -9,3 +9,16 @@ server/config.js
 server/node_modules
 client/node_modules
 .DS_Store
+
+# Sensitive files and credentials
+server/credentials/
+server/config/email.js
+server/config/firebase.js
+server/utils/logs/
+.env
+
+# Firebase service account
+*firebase-adminsdk*.json
+
+# Log files
+*.log

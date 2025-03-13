@@ -1,54 +1,35 @@
+/**
+ * @fileoverview Main router configuration for Community Cleanup Tracker
+ * Combines and mounts all API route modules
+ * @module router
+ */
+
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
 
-const upload = multer({ storage: multer.memoryStorage() });
+// Import route modules
+const userRoutes = require('./routes/userRoutes');
+const markerRoutes = require('./routes/markerRoutes');
+const emailRoutes = require('./routes/emailRoutes');
 
-const {
-  getAllUsers,
-  createUser,
-  updateUser,
-  deleteUser,
-  getAllMarkers,
-  saveMarker,
-  sendMail,
-  getMails,
-  apiTest
-} = require('./controller');
+// Import utility controller for API test
+const { apiTest } = require('./controllers/utilController');
 
-// Define routes and map them to controller methods
-router.get('/users', getAllUsers);
-router.post('/create', createUser);
-router.post('/update', updateUser);
-router.post('/delete', deleteUser);
-router.get('/api', apiTest);
-
-//Markers
-router.get('/markers', getAllMarkers);
-//router.post('/createMarker', saveMarker);
-router.post('/createMarker', upload.fields([
-  { name: 'images', maxCount: 5 },
-  { name: 'videos', maxCount: 2 }
-]), async (req, res) => {
-  console.log('Incoming Body:', req.body); // Log form fields
-  console.log('Incoming Files:', {
-      images: req.files?.images || [],
-      videos: req.files?.videos || []
-  }); // Log uploaded files in a cleaner format
-
-  try {
-      await saveMarker(req, res);
-  } catch (error) {
-      console.error('Error handling createMarker:', error);
-      res.status(500).send({ 
-          msg: 'Failed to save marker', 
-          error: error.message 
-      });
-  }
+// Base API routes
+router.get('/', (req, res) => {
+  res.json({
+    name: 'Community Cleanup Tracker API',
+    version: '1.0.0',
+    status: 'active'
+  });
 });
 
-//Email
-router.get('/send', sendMail);
-router.get('/list/:email', getMails);
+// API test route
+router.get('/api', apiTest);
+
+// Mount route modules - no versioning
+router.use('/users', userRoutes);
+router.use('/markers', markerRoutes);
+router.use('/email', emailRoutes);
 
 module.exports = router;

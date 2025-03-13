@@ -9,7 +9,7 @@ function UserList() {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('/user/users');
+      const response = await fetch('/users');
       const data = await response.json();
       setUsers(data); // Assuming data is an array of user objects
     } catch (error) {

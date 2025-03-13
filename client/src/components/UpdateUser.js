@@ -8,7 +8,7 @@ function UpdateUser() {
 
   const handleUpdateUser = async () => {
     try {
-      const response = await fetch('/user/update', {
+      const response = await fetch('/update', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
