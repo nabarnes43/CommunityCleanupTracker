@@ -4,6 +4,8 @@ import Home from './components/Home';
 import About from './components/About';
 import { UserList, CreateUser, UpdateUser, DeleteUser } from './components/User';
 import Navbar from './components/Navbar';
+import CameraComponent from './components/ImageCapture/TestCamera';
+import ImageCaptureDemo from './components/ImageCapture/ImageCaptureDemo';
 
 /**
  * Main application component that sets up routing for the application
@@ -23,6 +25,8 @@ const App: React.FC = () => {
             <Route path="/users/create" element={<CreateUser />} />
             <Route path="/users/update" element={<UpdateUser />} />
             <Route path="/users/delete" element={<DeleteUser />} />
+            <Route path="/test-camera" element={<CameraComponent />} />
+            <Route path="/image-capture-demo" element={<ImageCaptureDemo />} />
           </Routes>
         </div>
       </main>

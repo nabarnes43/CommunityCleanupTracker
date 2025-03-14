@@ -16,6 +16,7 @@ const Navbar: React.FC = () => {
         <li className="navbar-list-item"><Link to="/users/create">Create User</Link></li>
         <li className="navbar-list-item"><Link to="/users/update">Update User</Link></li>
         <li className="navbar-list-item"><Link to="/users/delete">Delete User</Link></li>
+        <li className="navbar-list-item"><Link to="/image-capture-demo">Image Capture</Link></li>
         <li className="navbar-list-item"><Link to="/about">About</Link></li>
       </ul>
     </nav>
