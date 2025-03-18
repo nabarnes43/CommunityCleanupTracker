@@ -91,27 +91,42 @@ export class CameraService {
     // Draw video frame to canvas
     ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
     
-    // Try multiple formats
-    const formats = ['image/jpeg', 'image/png', 'image/webp'];
-    
-    for (const format of formats) {
-      try {
-        const blob = await new Promise<Blob | null>((resolve) => {
-          canvas.toBlob(resolve, format, 0.95);
-        });
+    // Try JPEG format first (most compatible)
+    try {
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob(resolve, 'image/jpeg', 0.95);
+      });
+      
+      if (blob && blob.size > 0) {
+        console.log('Successfully created JPEG blob, size:', blob.size);
         
-        if (blob && blob.size > 0) {
-          console.log('Successfully created blob with format:', format, 'size:', blob.size);
-          
-          // Create extension based on format
-          const ext = format.split('/')[1];
-          
-          // Create a File object from the blob
-          return new File([blob], `image-${Date.now()}.${ext}`, { type: format });
-        }
-      } catch (err) {
-        console.warn(`Failed to capture with format ${format}:`, err);
+        // Create a File object from the blob with explicit MIME type
+        return new File([blob], `image-${Date.now()}.jpg`, { 
+          type: 'image/jpeg',
+          lastModified: Date.now()
+        });
       }
+    } catch (err) {
+      console.warn('Failed to capture as JPEG:', err);
+    }
+    
+    // Try PNG as fallback
+    try {
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob(resolve, 'image/png');
+      });
+      
+      if (blob && blob.size > 0) {
+        console.log('Successfully created PNG blob, size:', blob.size);
+        
+        // Create a File object from the blob with explicit MIME type
+        return new File([blob], `image-${Date.now()}.png`, { 
+          type: 'image/png',
+          lastModified: Date.now()
+        });
+      }
+    } catch (err) {
+      console.warn('Failed to capture as PNG:', err);
     }
     
     // If all formats fail, try data URL as last resort
@@ -120,7 +135,7 @@ export class CameraService {
       if (dataURL && dataURL !== 'data:,') {
         // Convert data URL to Blob
         const byteString = atob(dataURL.split(',')[1]);
-        const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+        const mimeString = 'image/jpeg'; // Force JPEG MIME type
         const ab = new ArrayBuffer(byteString.length);
         const ia = new Uint8Array(ab);
         
@@ -129,7 +144,10 @@ export class CameraService {
         }
         
         const blob = new Blob([ab], { type: mimeString });
-        return new File([blob], `image-${Date.now()}.jpg`, { type: 'image/jpeg' });
+        return new File([blob], `image-${Date.now()}.jpg`, { 
+          type: mimeString,
+          lastModified: Date.now()
+        });
       }
     } catch (dataUrlError) {
       console.warn('Failed to use dataURL fallback:', dataUrlError);
@@ -167,17 +185,40 @@ export class CameraService {
    * @returns {File} The recorded video as a File
    */
   static createVideoFile(recordedChunks: BlobPart[], mimeType: string = ''): File {
+    // Ensure we have valid chunks
+    if (!recordedChunks || recordedChunks.length === 0) {
+      throw new Error('No video data available');
+    }
+    
+    // Use MP4 as default format for better compatibility
+    const defaultMimeType = 'video/mp4';
+    
     // Determine file extension based on MIME type
-    const fileExtension = mimeType.startsWith('video/webm') ? 'webm' : 'mp4';
+    let fileExtension = 'mp4'; // Default to mp4
+    let finalMimeType = mimeType || defaultMimeType;
+    
+    // Map MIME types to extensions
+    if (mimeType.startsWith('video/webm')) {
+      fileExtension = 'webm';
+    } else if (mimeType.startsWith('video/quicktime')) {
+      fileExtension = 'mov';
+    } else if (mimeType.startsWith('video/x-msvideo')) {
+      fileExtension = 'avi';
+    }
     
     // Create a blob from recorded chunks
     const recordedBlob = new Blob(recordedChunks, {
-      type: mimeType || 'video/webm',
+      type: finalMimeType,
     });
+    
+    // Verify blob size
+    if (recordedBlob.size === 0) {
+      throw new Error('Created video has no data');
+    }
     
     // Create a File object from the blob
     return new File([recordedBlob], `video-${Date.now()}.${fileExtension}`, {
-      type: mimeType || 'video/webm',
+      type: finalMimeType,
     });
   }
 } 

@@ -38,15 +38,32 @@ export const getBestVideoMimeType = (): string => {
     return '';
   }
   
-  if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) {
+  // Try MP4 first for better compatibility
+  if (MediaRecorder.isTypeSupported('video/mp4')) {
+    return 'video/mp4';
+  } else if (MediaRecorder.isTypeSupported('video/mp4;codecs=h264')) {
+    return 'video/mp4;codecs=h264';
+  } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) {
     return 'video/webm;codecs=vp9,opus';
   } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')) {
     return 'video/webm;codecs=vp8,opus';
   } else if (MediaRecorder.isTypeSupported('video/webm')) {
     return 'video/webm';
-  } else if (MediaRecorder.isTypeSupported('video/mp4')) {
-    return 'video/mp4';
   }
   
-  return '';
+  // Fallback to default
+  return 'video/mp4';
+};
+
+/**
+ * Checks if a video format is supported for playback
+ * @param {string} mimeType - The MIME type to check
+ * @returns {boolean} True if the format is supported
+ */
+export const isVideoFormatSupported = (mimeType: string): boolean => {
+  // Create a video element to test format support
+  const video = document.createElement('video');
+  
+  // Check if the browser can play this type
+  return video.canPlayType(mimeType) !== '';
 }; 

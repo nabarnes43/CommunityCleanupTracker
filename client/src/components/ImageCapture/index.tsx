@@ -54,6 +54,11 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({
   const timerRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Log props for debugging
+  useEffect(() => {
+    console.log('ImageCapture props:', { allowMultiple, allowVideo, showPreview });
+  }, [allowMultiple, allowVideo, showPreview]);
+
   /**
    * Cleanup function to revoke object URLs when component unmounts
    */
@@ -151,34 +156,58 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({
   };
 
   /**
-   * Adds a new media file to the captured media array
+   * Adds a captured media item to the state
    * 
-   * @param {File} file - The captured file
+   * @param {CapturedMedia} media - The media item to add
+   * @param {boolean} skipCallback - Whether to skip calling the callback (used for direct video handling)
    */
-  const addCapturedMedia = (file: File) => {
-    const isImage = file.type.startsWith('image/');
-    const newMedia: CapturedMedia = {
-      file,
-      type: isImage ? 'image' : 'video',
-      previewUrl: URL.createObjectURL(file)
-    };
-    
-    if (allowMultiple) {
-      setCapturedMedia(prev => [...prev, newMedia]);
-    } else {
-      // Clean up previous preview URLs
-      capturedMedia.forEach(media => {
-        URL.revokeObjectURL(media.previewUrl);
-      });
-      setCapturedMedia([newMedia]);
-    }
-    
-    // Call the callback with all files
-    const updatedFiles = allowMultiple 
-      ? [...capturedMedia.map(m => m.file), file]
-      : [file];
-    
-    onImageCapture(updatedFiles);
+  const addCapturedMedia = (media: CapturedMedia, skipCallback: boolean = false) => {
+    // Update state with the new media
+    setCapturedMedia(prevMedia => {
+      // Check if this media already exists to prevent duplicates
+      const isDuplicate = prevMedia.some(existingMedia => 
+        existingMedia.file.name === media.file.name && 
+        existingMedia.file.size === media.file.size && 
+        existingMedia.file.type === media.file.type
+      );
+      
+      // If it's a duplicate, return the current state unchanged
+      if (isDuplicate) {
+        console.log(`Skipping duplicate ${media.type} file:`, media.file.name);
+        return prevMedia;
+      }
+      
+      let updatedMedia: CapturedMedia[];
+      
+      if (allowMultiple) {
+        // When allowMultiple is true, append new media to existing media
+        updatedMedia = [...prevMedia, media];
+      } else {
+        // Clean up previous preview URLs
+        prevMedia.forEach(m => {
+          URL.revokeObjectURL(m.previewUrl);
+        });
+        
+        // Replace existing media with new media
+        updatedMedia = [media];
+      }
+      
+      console.log(`Added 1 ${media.type} file to internal state. New total: ${updatedMedia.length}`);
+      
+      // Call the callback with the updated files if not skipped
+      if (!skipCallback) {
+        // We use the updated array to ensure we have the latest state
+        const allFiles = updatedMedia.map(m => m.file);
+        
+        // Call this outside of setState to avoid nested state updates
+        setTimeout(() => {
+          console.log('Calling onImageCapture from addCapturedMedia with', allFiles.length, 'files');
+          onImageCapture(allFiles);
+        }, 0);
+      }
+      
+      return updatedMedia;
+    });
   };
 
   /**
@@ -196,8 +225,27 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({
       // Use the CameraService to capture the image
       const file = await CameraService.captureImage(videoRef.current);
       
-      // Add to captured media
-      addCapturedMedia(file);
+      // Verify the file is valid before adding it
+      if (!file || file.size === 0) {
+        throw new Error('Failed to capture a valid image. Please try again.');
+      }
+      
+      console.log('Created image file:', {
+        name: file.name,
+        type: file.type,
+        size: file.size
+      });
+      
+      // Add to captured media but skip the callback
+      addCapturedMedia({
+        file,
+        type: 'image',
+        previewUrl: URL.createObjectURL(file)
+      }, true); // Skip the callback
+      
+      // Call the callback directly to avoid duplication
+      console.log('Calling onImageCapture directly with new image');
+      onImageCapture([file]);
       
       // Stop camera after successful capture
       stopCamera();
@@ -249,8 +297,32 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({
           // Create a File from the recorded chunks
           const file = CameraService.createVideoFile(recordedChunksRef.current, mimeType);
           
-          // Add to captured media
-          addCapturedMedia(file);
+          // Verify the file is valid before adding it
+          if (!file || file.size === 0) {
+            throw new Error('Failed to create a valid video file. Please try again.');
+          }
+          
+          // Create a unique identifier for this video based on timestamp to avoid duplicates
+          const uniqueFileName = `video_${Date.now()}.${file.name.split('.').pop()}`;
+          const uniqueFile = new File([file], uniqueFileName, { type: file.type });
+          
+          console.log('Created video file:', {
+            name: uniqueFile.name,
+            type: uniqueFile.type,
+            size: uniqueFile.size
+          });
+          
+          // Add to captured media but skip the callback
+          addCapturedMedia({
+            file: uniqueFile,
+            type: 'video',
+            previewUrl: URL.createObjectURL(uniqueFile)
+          }, true); // Skip the callback
+          
+          // IMPORTANT: For videos captured directly, we'll call onImageCapture directly
+          // This bypasses the internal capturedMedia state's callback to avoid duplication
+          console.log('Calling onImageCapture directly with new video');
+          onImageCapture([uniqueFile]);
           
           // Stop camera after recording
           stopCamera();
@@ -316,6 +388,9 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({
    * Handles video action (start/stop recording)
    */
   const handleVideoAction = () => {
+    // Log current mode for debugging
+    console.log('Video action triggered in mode:', isVideoMode ? 'video' : 'photo');
+    
     if (isVideoMode) {
       // In video mode, handle recording
       if (isRecording) {
@@ -333,6 +408,8 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({
    * Toggles between photo and video mode
    */
   const toggleMode = () => {
+    console.log('Toggling mode from', isVideoMode ? 'video' : 'photo', 'to', !isVideoMode ? 'video' : 'photo');
+    
     if (isRecording) {
       stopRecording();
     }
@@ -340,6 +417,9 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({
     if (isCameraActive) {
       stopCamera();
     }
+    
+    // Clear any errors when switching modes
+    setError(null);
     
     setIsVideoMode(!isVideoMode);
   };
@@ -370,25 +450,128 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({
     // Convert FileList to array
     const fileArray = Array.from(files);
     
-    // Process each file
-    const newMedia: CapturedMedia[] = fileArray.map(file => ({
-      file,
-      type: file.type.startsWith('image/') ? 'image' : 'video',
-      previewUrl: URL.createObjectURL(file)
-    }));
+    // Log file information for debugging
+    console.log('File selection:', fileArray.map(f => ({
+      name: f.name,
+      type: f.type,
+      size: f.size
+    })));
+    console.log('allowMultiple:', allowMultiple);
     
-    // Update captured media
-    if (allowMultiple) {
-      setCapturedMedia(prev => [...prev, ...newMedia]);
-      onImageCapture([...capturedMedia.map(m => m.file), ...fileArray]);
-    } else {
-      // Clean up previous preview URLs
-      capturedMedia.forEach(media => {
-        URL.revokeObjectURL(media.previewUrl);
-      });
-      setCapturedMedia(newMedia);
-      onImageCapture(fileArray);
+    // Validate files before processing
+    // Check for empty files
+    const validFiles = fileArray.filter(file => file.size > 0);
+    
+    // Check if we have any valid files after filtering
+    if (validFiles.length === 0) {
+      setError('No valid files were selected. Files may be empty or corrupted.');
+      
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
     }
+    
+    // Define supported formats
+    const supportedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    const supportedVideoTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo'];
+    
+    // Determine if we're in image or video mode
+    const currentMode = isVideoMode ? 'video' : 'image';
+    
+    // Filter files to match the current mode
+    const modeFilteredFiles = validFiles.filter(file => {
+      const fileType = file.type.split('/')[0]; // 'image' or 'video'
+      return fileType === currentMode;
+    });
+    
+    if (modeFilteredFiles.length === 0) {
+      setError(`Please select only ${currentMode} files when in ${currentMode} mode.`);
+      
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+    
+    // Check for format support based on mode
+    const unsupportedFiles = modeFilteredFiles.filter(file => {
+      if (file.type.startsWith('image/')) {
+        return !supportedImageTypes.includes(file.type);
+      } else if (file.type.startsWith('video/')) {
+        return !supportedVideoTypes.includes(file.type);
+      }
+      return true; // Any other type is unsupported
+    });
+    
+    if (unsupportedFiles.length > 0) {
+      // Create a more specific error message
+      const fileTypes = unsupportedFiles.map(f => f.type || 'unknown type').join(', ');
+      if (unsupportedFiles[0].type.startsWith('image/')) {
+        setError(`Unsupported image format: ${fileTypes}. Please use JPG, PNG, or GIF formats.`);
+      } else if (unsupportedFiles[0].type.startsWith('video/')) {
+        setError(`Unsupported video format: ${fileTypes}. Please use MP4, MOV, or AVI formats.`);
+      } else {
+        setError(`Unsupported file format: ${fileTypes}. Please use supported image or video formats.`);
+      }
+      
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+    
+    // Filter out any files that are already in capturedMedia to prevent duplicates
+    const uniqueFiles = modeFilteredFiles.filter(newFile => {
+      // Check if this file already exists in capturedMedia
+      return !capturedMedia.some(existingMedia => 
+        existingMedia.file.name === newFile.name && 
+        existingMedia.file.size === newFile.size && 
+        existingMedia.file.type === newFile.type
+      );
+    });
+    
+    // If all files were duplicates, show a message and exit
+    if (uniqueFiles.length === 0) {
+      setError('All selected files have already been added.');
+      
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+    
+    // Add files to internal state but skip the callback
+    for (const file of uniqueFiles) {
+      // Create a new media object
+      const newMedia: CapturedMedia = {
+        file,
+        type: file.type.startsWith('image/') ? 'image' : 'video',
+        previewUrl: URL.createObjectURL(file)
+      };
+      
+      // Add to captured media but skip the callback
+      if (allowMultiple) {
+        // When allowMultiple is true, append new media to existing media
+        setCapturedMedia(prev => [...prev, newMedia]);
+      } else {
+        // Clean up previous preview URLs
+        capturedMedia.forEach(media => {
+          URL.revokeObjectURL(media.previewUrl);
+        });
+        
+        // Replace existing media with new media
+        setCapturedMedia([newMedia]);
+      }
+    }
+    
+    // Call the callback directly with just the new files
+    console.log('Calling onImageCapture directly with selected files:', uniqueFiles.length);
+    onImageCapture(uniqueFiles);
     
     // Reset file input
     if (fileInputRef.current) {
@@ -397,25 +580,36 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({
   };
 
   /**
-   * Removes a media file from the captured media
+   * Removes a media item from the captured media array
+   * 
+   * @param {number} index - The index of the media item to remove
    */
-  const removeMedia = (index: number) => {
-    if (index < 0 || index >= capturedMedia.length) return;
-    
-    // Revoke the URL to prevent memory leaks
-    URL.revokeObjectURL(capturedMedia[index].previewUrl);
-    
-    // Remove the media from the array
-    const newMedia = [...capturedMedia];
-    newMedia.splice(index, 1);
-    setCapturedMedia(newMedia);
-    
-    // Update the callback
-    if (newMedia.length === 0) {
-      onImageCapture(null);
-    } else {
-      onImageCapture(newMedia.map(m => m.file));
-    }
+  const handleRemoveMedia = (index: number) => {
+    setCapturedMedia(prevMedia => {
+      // Create a copy of the current media array
+      const updatedMedia = [...prevMedia];
+      
+      // Get the media item to remove
+      const mediaToRemove = updatedMedia[index];
+      
+      if (mediaToRemove) {
+        // Revoke the object URL to prevent memory leaks
+        URL.revokeObjectURL(mediaToRemove.previewUrl);
+        
+        // Remove the item from the array
+        updatedMedia.splice(index, 1);
+        
+        console.log(`Removed 1 ${mediaToRemove.type} file. New total: ${updatedMedia.length}`);
+        
+        // Call the callback with the updated files
+        const allFiles = updatedMedia.map(m => m.file);
+        
+        // Call this outside of setState to avoid nested state updates
+        setTimeout(() => onImageCapture(allFiles), 0);
+      }
+      
+      return updatedMedia;
+    });
   };
 
   /**
@@ -443,76 +637,72 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({
 
   return (
     <div className="image-capture">
-      {/* Camera preview */}
-      {isCameraActive && (
-        <CameraPreview
-          stream={stream}
-          isRecording={isRecording}
-          recordingTime={recordingTime}
-          videoRef={videoRef}
-          onError={setError}
-        />
-      )}
-      
-      {/* Error message */}
-      {error && (
-        <ErrorHelp
-          error={error}
-          openFileSelection={openFileSelection}
-        />
-      )}
-      
-      {/* Camera controls */}
-      {!useIOSControls && !error && (
-        <CameraControls
-          isCameraActive={isCameraActive}
-          isRecording={isRecording}
-          isVideoMode={isVideoMode}
-          allowVideo={allowVideo}
-          captureButtonText={captureButtonText}
-          galleryButtonText={galleryButtonText}
-          toggleCamera={toggleCamera}
-          handleVideoAction={handleVideoAction}
-          toggleMode={toggleMode}
-          stopCamera={stopCamera}
-          openFileSelection={openFileSelection}
-        />
-      )}
-      
-      {/* iOS-specific controls */}
-      {useIOSControls && !error && (
-        <IOSControls
-          isVideoMode={isVideoMode}
-          captureButtonText={captureButtonText}
-          galleryButtonText={galleryButtonText}
-          allowVideo={allowVideo}
-          openFileSelection={openFileSelection}
-          toggleMode={toggleMode}
-          fileInputRef={fileInputRef}
-        />
-      )}
-      
-      {/* File input for gallery selection */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileSelection}
-        accept={allowVideo && isVideoMode ? "video/*" : "image/*"}
-        multiple={allowMultiple}
-        style={{ display: 'none' }}
-        {...(useIOSControls ? { capture: isVideoMode ? "user" : "environment" } : {})}
-      />
-      
-      {/* Media preview */}
-      {showPreview && capturedMedia.length > 0 && (
-        <div className="media-preview-section">
-          <MediaPreview
-            capturedMedia={capturedMedia}
-            onRemove={removeMedia}
-            onDownload={enableDownload ? downloadMedia : undefined}
-          />
+      <div className="image-capture-container">
+        {error && <div className="error-message">{error}</div>}
+        
+        <div className="mode-indicator">
+          {isVideoMode ? 'Video Mode' : 'Photo Mode'}
         </div>
-      )}
+        
+        {isCameraActive && (
+          <CameraPreview
+            stream={stream}
+            isRecording={isRecording}
+            recordingTime={recordingTime}
+            videoRef={videoRef}
+            onError={setError}
+          />
+        )}
+        
+        {!useIOSControls && !error && (
+          <CameraControls
+            isCameraActive={isCameraActive}
+            isRecording={isRecording}
+            isVideoMode={isVideoMode}
+            allowVideo={allowVideo}
+            captureButtonText={captureButtonText}
+            galleryButtonText={galleryButtonText}
+            toggleCamera={toggleCamera}
+            handleVideoAction={handleVideoAction}
+            toggleMode={toggleMode}
+            stopCamera={stopCamera}
+            openFileSelection={openFileSelection}
+          />
+        )}
+        
+        {useIOSControls && !error && (
+          <IOSControls
+            isVideoMode={isVideoMode}
+            captureButtonText={captureButtonText}
+            galleryButtonText={galleryButtonText}
+            allowVideo={allowVideo}
+            openFileSelection={openFileSelection}
+            toggleMode={toggleMode}
+            fileInputRef={fileInputRef}
+          />
+        )}
+        
+        <input
+          type="file"
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+          accept={isVideoMode ? 'video/*' : 'image/*'}
+          onChange={handleFileSelection}
+          multiple={allowMultiple}
+          {...(useIOSControls ? { capture: isVideoMode ? "user" : "environment" } : {})}
+        />
+        
+        {showPreview && capturedMedia.length > 0 && (
+          <div className="media-preview-section">
+            <h3>Captured Media ({capturedMedia.length})</h3>
+            <MediaPreview
+              capturedMedia={capturedMedia}
+              onRemove={handleRemoveMedia}
+              onDownload={enableDownload ? downloadMedia : undefined}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

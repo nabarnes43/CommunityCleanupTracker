@@ -194,6 +194,7 @@ button:active {
 @supports (-webkit-touch-callout: none) {
   button {
     -webkit-appearance: none;
+    appearance: none;
     padding: 14px 18px;
   }
 }
@@ -271,9 +272,12 @@ button:focus {
 }
 
 .preview-video {
-  max-width: 100%;
+  width: 100%;
+  height: auto;
   max-height: 400px;
-  border-radius: 4px;
+  object-fit: contain;
+  background-color: #000;
+  border-radius: 8px;
 }
 
 .preview-actions {
@@ -339,6 +343,16 @@ button:focus {
 
 .video-thumbnail {
   position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.video-thumb-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .video-icon {
@@ -355,6 +369,18 @@ button:focus {
   align-items: center;
   justify-content: center;
   font-size: 12px;
+}
+
+.video-label {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: bold;
 }
 
 /* Responsive adjustments for media preview */
@@ -375,4 +401,28 @@ button:focus {
   .action-button {
     width: 100%;
   }
+}
+
+.mode-indicator {
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  margin: 8px auto;
+  width: fit-content;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.error-message {
+  background-color: #ff5252;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  text-align: center;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }

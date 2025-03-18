@@ -36,6 +36,7 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({
             <video 
               src={capturedMedia[selectedIndex].previewUrl} 
               controls 
+              autoPlay={false}
               className="preview-video"
             />
           )}
@@ -69,8 +70,14 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({
               <img src={media.previewUrl} alt={`Thumbnail ${index + 1}`} />
             ) : (
               <div className="video-thumbnail">
-                <img src={media.previewUrl} alt={`Video thumbnail ${index + 1}`} />
+                <video 
+                  src={media.previewUrl} 
+                  className="video-thumb-preview"
+                  muted
+                  preload="metadata"
+                />
                 <span className="video-icon">▶</span>
+                <span className="video-label">Video</span>
               </div>
             )}
           </div>
