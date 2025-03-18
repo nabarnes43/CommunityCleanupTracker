@@ -92,6 +92,14 @@ const CameraPreview: React.FC<CameraPreviewProps> = ({
     }
   }, [stream, videoRef, onError]);
 
+  // Log when component mounts or updates
+  useEffect(() => {
+    console.log('CameraPreview component rendered, stream:', stream ? 'available' : 'not available');
+    return () => {
+      console.log('CameraPreview component unmounted');
+    };
+  }, [stream]);
+
   return (
     <div className="camera-container">
       {/* Camera video element */}
@@ -121,9 +129,11 @@ const CameraPreview: React.FC<CameraPreviewProps> = ({
           right: 0,
           bottom: 0,
           minWidth: '100%',
-          minHeight: '100%'
+          minHeight: '100%',
+          backgroundColor: '#000', // Add background color
+          zIndex: 5 // Ensure proper layering
         }}
-        poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23333'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' text-anchor='middle' fill='%23fff'%3EInitializing camera...%3C/text%3E%3C/svg%3E"
+        poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23333'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='8' text-anchor='middle' fill='%23fff'%3EInitializing camera...%3C/text%3E%3C/svg%3E"
       />
       
       {/* Camera readiness indicator */}

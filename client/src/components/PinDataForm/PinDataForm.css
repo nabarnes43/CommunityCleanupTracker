@@ -154,6 +154,16 @@
     margin-top: 5px;
 }
 
+/* Desktop-only styling for the cancel button */
+@media (min-width: 768px) {
+    .pin-form button[type="button"] {
+        width: 50%; /* Make it half the width */
+        margin-left: auto; /* Center it with auto margins */
+        margin-right: auto;
+        display: block; /* Required for margin auto to work */
+    }
+}
+
 .pin-form button[type="submit"]:hover {
     background-color: #0056b3;
 }
@@ -244,19 +254,23 @@
 .camera-preview {
     width: 100%;
     height: auto;
+    aspect-ratio: 4/3;
     max-height: 250px;
+
     display: block;
-    aspect-ratio: 4/3; /* Maintain a standard aspect ratio */
     object-fit: cover; /* Ensure the video fills the container */
+    z-index: 1; /* Ensure it's above background */
 }
 
 /* Video element styling */
 .camera-container video {
     width: 100%;
-    height: auto;
-    max-height: 250px;
+    height: 100%;
+    position: absolute; /* Position absolutely within container */
+    top: 0;
+    left: 0;
     object-fit: cover;
-    aspect-ratio: 4/3; /* Maintain a standard aspect ratio */
+    z-index: 1; /* Ensure it's above background */
 }
 
 /* Camera controls - fixed position at bottom */

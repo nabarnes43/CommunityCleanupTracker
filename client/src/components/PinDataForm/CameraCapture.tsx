@@ -66,6 +66,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
       });
     };
   }, [images, videos]);
+
   
   /**
    * Handles image capture from the ImageCapture component
@@ -334,7 +335,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
     fontWeight: 'bold',
     textAlign: 'center'
   };
-  
+
   return (
     <div style={wrapperStyle}>
       <div style={infoContainerStyle}>
@@ -345,15 +346,15 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
         {error && <div style={errorStyle}>{error}</div>}
       </div>
       
-      <ImageCapture
-        allowVideo={true}
-        allowMultiple={true}
-        showPreview={false} // Disable internal preview to avoid confusion
-        enableDownload={false}
-        captureButtonText="Take Photo"
-        galleryButtonText="Select Photo"
-        onImageCapture={handleImageCapture}
-      />
+        <ImageCapture
+          allowVideo={true}
+          allowMultiple={true}
+          showPreview={false} // Disable internal preview to avoid confusion
+          enableDownload={false}
+          captureButtonText="Take Photo"
+          galleryButtonText="Select Photo"
+          onImageCapture={handleImageCapture}
+        />
       
       {/* Display thumbnails of current uploads */}
       {(validImages.length > 0 || validVideos.length > 0) && (
