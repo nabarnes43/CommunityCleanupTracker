@@ -87,7 +87,7 @@
 
 /* Desktop-specific styles */
 .navbar.desktop {
-  height: 20px;
+  height: auto;
   padding: 3px 0;
 }
 
