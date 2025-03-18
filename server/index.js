@@ -29,7 +29,16 @@ const app = express();
 // We'll add the request ID middleware after we import it
 app.use(express.json()); // Parse JSON request bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
-app.use(cors()); // Enable CORS for all routes
+
+// Enhanced CORS configuration
+app.use(cors({
+  origin: '*', // Allow requests from any origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Handle preflight requests
+app.options('*', cors());
 
 // Request logging middleware
 app.use(requestLoggerMiddleware);

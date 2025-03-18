@@ -5,7 +5,7 @@ import './Home.css';
 import PinDataForm from '../PinDataForm/index';
 import MapUpdater from './MapUpdater';
 import MarkerClusterComponent from './MarkerClusterComponent';
-import { newMarkerIcon } from './mapIcons';
+import { newMarkerIcon, customIcon } from './mapIcons';
 import { Marker as MarkerType } from '../../types';
 import { LatLngTuple } from 'leaflet';
 
@@ -41,6 +41,8 @@ const Home: React.FC = () => {
   const [userLocation, setUserLocation] = useState<LatLngTuple | null>(null);
   const [showForm, setShowForm] = useState<boolean>(false);
   const [markers, setMarkers] = useState<MarkerType[]>(initialMarkers);
+  const [pendingMarker, setPendingMarker] = useState<LatLngTuple | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   /**
    * Fetch existing markers from the backend when the component mounts
@@ -48,7 +50,8 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchMarkers = async () => {
       try {
-        const response = await fetch('http://localhost:4000/markers');
+        // Use relative URL which will work with any domain
+        const response = await fetch('/markers');
         if (response.ok) {
           const data = await response.json();
           console.log('Fetched markers:', data); // Debug log
@@ -71,28 +74,57 @@ const Home: React.FC = () => {
 
   /**
    * Handle locating the user and showing the form
+   * Only show permission alert if geolocation is unavailable or denied
    */
   const handleLocateUser = () => {
-    if (navigator.geolocation) {
-      setShowForm(true); // Show the form when location is found
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          const location: LatLngTuple = [latitude, longitude];
-          setUserLocation(location);
-          setMapCenter(location); // Center the map on the user's location
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-        }
-      );
-    } else {
-      alert('Geolocation is not supported by your browser.');
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser. This feature requires location access to work.');
+      return;
     }
+    
+    // Request location with high accuracy option
+    navigator.geolocation.getCurrentPosition(
+      // Success callback
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        console.log('Location obtained:', latitude, longitude);
+        const location: LatLngTuple = [latitude, longitude];
+        setUserLocation(location);
+        setMapCenter(location); // Center the map on the user's location
+        setShowForm(true); // Only show the form after we have the location
+      },
+      // Error callback
+      (error) => {
+        console.error('Error getting location:', error);
+        
+        // Provide specific feedback based on the error
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            alert('Location access was denied. We need precise location access to accurately report issues in your community. Please enable precise location access in your browser settings and try again.');
+            break;
+          case error.POSITION_UNAVAILABLE:
+            alert('Location information is unavailable. Please try again later or check your device settings.');
+            break;
+          case error.TIMEOUT:
+            alert('The request to get your location timed out. Please try again.');
+            break;
+          default:
+            alert('An unknown error occurred while trying to access your location. Please try again.');
+            break;
+        }
+      },
+      // Options
+      {
+        enableHighAccuracy: true, // Request high accuracy for better mapping
+        timeout: 10000, // 10 second timeout
+        maximumAge: 0 // Don't use a cached position
+      }
+    );
   };
 
   /**
    * Handle form submission for adding a new marker
+   * Immediately closes the form and shows a pending marker
    * 
    * @param {FormData} formData - The form data for the new marker
    */
@@ -105,6 +137,13 @@ const Home: React.FC = () => {
     }
 
     if (userLocation) {
+      // Close the form immediately
+      setShowForm(false);
+      
+      // Set the pending marker to show immediately while we save to server
+      setPendingMarker(userLocation);
+      setIsSubmitting(true);
+      
       // Since we already have a FormData object, we should use it directly
       // First, let's add the location data
       formData.append('location', JSON.stringify({
@@ -112,32 +151,74 @@ const Home: React.FC = () => {
         longitude: userLocation[1],
       }));
 
+      console.log('Location added to form data:', userLocation);
+      
       try {
+        console.log('Sending request to /markers/create');
         // We can now send the FormData directly to the backend
-        const response = await fetch('http://localhost:4000/markers/create', {
+        // Use relative URL which will work with any domain
+        const response = await fetch('/markers/create', {
           method: 'POST',
           body: formData, // Using the original FormData object
+          // Do NOT set Content-Type when sending FormData
+          // The browser will set it to multipart/form-data with the correct boundary
         });
 
+        console.log('Response status:', response.status);
+        
         if (response.ok) {
           console.log('Marker saved successfully!');
-          setShowForm(false); // Close the form on success
           
           // Refresh markers after adding a new one
-          const markersResponse = await fetch('http://localhost:4000/markers');
+          console.log('Fetching updated markers');
+          const markersResponse = await fetch('/markers');
           if (markersResponse.ok) {
             const data = await markersResponse.json();
+            console.log('Updated markers received:', data);
             setMarkers(data);
+            
+            // Keep the pending marker active so user knows which one they just added
+            // But turn off submission state to indicate successful save
+            setIsSubmitting(false);
+            
+            // After 5 seconds, clear the pending marker highlight
+            setTimeout(() => {
+              setPendingMarker(null);
+            }, 5000);
+          } else {
+            console.error('Failed to fetch updated markers:', markersResponse.status);
+            const errorText = await markersResponse.text();
+            console.error('Error response:', errorText);
+            
+            // Reset submission state but keep pending marker visible
+            setIsSubmitting(false);
           }
         } else {
-          const errorResponse = await response.json();
-          console.error('Error saving marker:', errorResponse);
+          console.error('Error saving marker:', response.status);
+          // Try to get error details
+          try {
+            const errorResponse = await response.json();
+            console.error('Error details:', errorResponse);
+          } catch (e) {
+            // If JSON parsing fails, get the raw text
+            const errorText = await response.text();
+            console.error('Error response text:', errorText);
+          }
+          
+          // Reset submission state but keep pending marker visible to show failure
+          setIsSubmitting(false);
+          
+          // Alert the user about the failure
+          alert('Failed to save your marker. Please try again.');
         }
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Network or other error:', error);
+        setIsSubmitting(false);
+        alert('Network error occurred while saving your marker. Please check your connection and try again.');
       }
     } else {
       console.error('User location not available');
+      alert('Unable to save marker: Your location is not available');
     }
   };
 
@@ -171,12 +252,23 @@ const Home: React.FC = () => {
 
         <MarkerClusterComponent markers={markers} />
 
+        {/* User's current location marker */}
         {userLocation && (
           <Marker 
             position={userLocation} 
             icon={newMarkerIcon}
           >
             <Popup>You are here!</Popup>
+          </Marker>
+        )}
+        
+        {/* Pending marker that was just submitted */}
+        {pendingMarker && (
+          <Marker 
+            position={pendingMarker} 
+            icon={newMarkerIcon}
+          >
+            <Popup>{isSubmitting ? 'Saving your marker...' : 'Your recently added marker!'}</Popup>
           </Marker>
         )}
         
