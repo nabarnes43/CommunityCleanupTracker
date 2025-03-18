@@ -301,6 +301,18 @@
     left: 0;
 }
 
+/* Modal content styling - desktop */
+.modal-content {
+    position: relative;
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 90%;
+    max-height: 90%;
+    overflow-y: auto;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
 @media (max-width: 767px) {
     .modal {
         align-items: flex-start;
@@ -320,4 +332,40 @@
         right: 0 !important;
         bottom: 0 !important;
     }
+}
+
+/* Cancel Button (X) */
+.modal-cancel-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #ffffff;
+  border: none;
+  font-size: 32px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #333;
+  z-index: 2001;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+/* Adjust for mobile */
+@media (max-width: 767px) {
+  .modal-cancel-btn {
+      top: 8px;
+      right: 8px;
+      width: 32px;
+      height: 32px;
+      font-size: 16px;
+  }
 }
