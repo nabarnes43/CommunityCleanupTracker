@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 import { MapUpdaterProps } from '../../types';
 
@@ -13,12 +13,15 @@ import { MapUpdaterProps } from '../../types';
 const MapUpdater: React.FC<MapUpdaterProps> = ({ userLocation, mapZoom = 18 }) => {
   const map = useMap();
 
-  // When userLocation is updated, center the map to that location with the specified zoom level
-  if (userLocation) {
-    map.flyTo(userLocation, mapZoom, {
-      duration: 1, // Faster animation for better user experience
-    });
-  }
+  // Use useEffect to handle map updates when userLocation changes
+  useEffect(() => {
+    // Only update the map if userLocation is available
+    if (userLocation) {
+      map.flyTo(userLocation, mapZoom, {
+        duration: 1, // Faster animation for better user experience
+      });
+    }
+  }, [userLocation, mapZoom, map]); // Dependencies for the effect
 
   return null; // This component doesn't render anything itself
 };

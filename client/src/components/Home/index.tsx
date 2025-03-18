@@ -45,6 +45,8 @@ const Home: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   // Adding a new state for zoom level to control it programmatically
   const [mapZoom, setMapZoom] = useState<number>(13);
+  // Add a state to track if the geolocation is in progress
+  const [isGeolocating, setIsGeolocating] = useState<boolean>(false);
 
   /**
    * Fetch existing markers from the backend when the component mounts
@@ -86,18 +88,25 @@ const Home: React.FC = () => {
     
     // Show form immediately to improve perceived performance
     setShowForm(true);
+    // Set geolocating state to true
+    setIsGeolocating(true);
     
     // Request location with high accuracy option
     navigator.geolocation.getCurrentPosition(
       // Success callback
       (position) => {
-        const { latitude, longitude } = position.coords;
-        console.log('Location obtained:', latitude, longitude);
-        const location: LatLngTuple = [latitude, longitude];
-        setUserLocation(location);
-        setMapCenter(location); // Center the map on the user's location
-        // Set a higher zoom level for better detail
-        setMapZoom(18);
+        // Only proceed if the form is still showing (user hasn't cancelled)
+        if (showForm && isGeolocating) {
+          const { latitude, longitude } = position.coords;
+          console.log('Location obtained:', latitude, longitude);
+          const location: LatLngTuple = [latitude, longitude];
+          setUserLocation(location);
+          setMapCenter(location); // Center the map on the user's location
+          // Set a higher zoom level for better detail
+          setMapZoom(18);
+        }
+        // Reset geolocating state
+        setIsGeolocating(false);
       },
       // Error callback
       (error) => {
@@ -105,6 +114,8 @@ const Home: React.FC = () => {
         
         // Close the form if we can't get location
         setShowForm(false);
+        // Reset geolocating state
+        setIsGeolocating(false);
         
         // Provide specific feedback based on the error
         switch (error.code) {
@@ -133,12 +144,22 @@ const Home: React.FC = () => {
 
   /**
    * Handle form cancellation
-   * Clears the user location pin from the map
+   * Clears the user location pin from the map and cancels any pending geolocation requests
    */
   const handleFormCancel = () => {
     setShowForm(false);
     // Clear the user location pin when canceling
     setUserLocation(null);
+    // Reset map zoom to default
+    setMapZoom(13);
+    // Reset map center to default
+    setMapCenter([33.7501, -84.3885]);
+    
+    // Indicate that we should stop any pending geolocation processes
+    setIsGeolocating(false);
+    
+    // Clear any pending markers
+    setPendingMarker(null);
   };
 
   /**
@@ -241,16 +262,44 @@ const Home: React.FC = () => {
     }
   };
 
+  /**
+   * Handler for the Report Issue button
+   * Currently just shows an alert as a placeholder for future functionality
+   */
+  const handleReportIssue = () => {
+    alert('Report Issue functionality will be implemented in a future update.');
+  };
+
   return (
     <div className="container">
-      <button className="location-button" onClick={handleLocateUser}>
-        Drop Pin at My Location
-      </button>
+      {/* Action buttons in a container with flexbox layout */}
+      <div className="buttons-container">
+        <button 
+          className="action-button pin-button" 
+          onClick={handleLocateUser} 
+          title="Drop Pin at My Location"
+          type="button"
+        >
+          <img src={customIcon.options.iconUrl} alt="Drop Pin" style={{ width: '80%', height: '80%' }} />
+        </button>
+        
+        <button 
+          className="action-button report-button" 
+          onClick={handleReportIssue} 
+          title="Report Issue"
+          type="button"
+        >
+          !
+        </button>
+      </div>
 
       {/* Display the PinDataForm as a modal if showForm is true */}
       {showForm && (
         <div className="modal">
           <div className="modal-content">
+            <button className="modal-cancel-btn" onClick={handleFormCancel}>
+              ×
+            </button>
             <PinDataForm 
               onSubmit={handleFormSubmit} 
               onCancel={handleFormCancel} 
@@ -272,12 +321,12 @@ const Home: React.FC = () => {
         <MarkerClusterComponent markers={markers} />
 
         {/* User's current location marker */}
-        {userLocation && (
+        {userLocation && isGeolocating && (
           <Marker 
             position={userLocation} 
             icon={newMarkerIcon}
           >
-            <Popup>You are here!</Popup>
+            <Popup className="custom-popup">You are here!</Popup>
           </Marker>
         )}
         
@@ -287,12 +336,15 @@ const Home: React.FC = () => {
             position={pendingMarker} 
             icon={newMarkerIcon}
           >
-            <Popup>{isSubmitting ? 'Saving your marker...' : 'Your recently added marker!'}</Popup>
+            <Popup className="custom-popup">{isSubmitting ? 'Saving your marker...' : 'Your recently added marker!'}</Popup>
           </Marker>
         )}
         
         {/* Component to automatically update the map's view */}
-        <MapUpdater userLocation={userLocation} mapZoom={mapZoom} />
+        <MapUpdater 
+          userLocation={isGeolocating ? userLocation : null} 
+          mapZoom={mapZoom} 
+        />
       </MapContainer>
     </div>
   );
