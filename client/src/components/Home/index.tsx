@@ -43,6 +43,8 @@ const Home: React.FC = () => {
   const [markers, setMarkers] = useState<MarkerType[]>(initialMarkers);
   const [pendingMarker, setPendingMarker] = useState<LatLngTuple | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  // Adding a new state for zoom level to control it programmatically
+  const [mapZoom, setMapZoom] = useState<number>(13);
 
   /**
    * Fetch existing markers from the backend when the component mounts
@@ -82,6 +84,9 @@ const Home: React.FC = () => {
       return;
     }
     
+    // Show form immediately to improve perceived performance
+    setShowForm(true);
+    
     // Request location with high accuracy option
     navigator.geolocation.getCurrentPosition(
       // Success callback
@@ -91,11 +96,15 @@ const Home: React.FC = () => {
         const location: LatLngTuple = [latitude, longitude];
         setUserLocation(location);
         setMapCenter(location); // Center the map on the user's location
-        setShowForm(true); // Only show the form after we have the location
+        // Set a higher zoom level for better detail
+        setMapZoom(18);
       },
       // Error callback
       (error) => {
         console.error('Error getting location:', error);
+        
+        // Close the form if we can't get location
+        setShowForm(false);
         
         // Provide specific feedback based on the error
         switch (error.code) {
@@ -120,6 +129,16 @@ const Home: React.FC = () => {
         maximumAge: 0 // Don't use a cached position
       }
     );
+  };
+
+  /**
+   * Handle form cancellation
+   * Clears the user location pin from the map
+   */
+  const handleFormCancel = () => {
+    setShowForm(false);
+    // Clear the user location pin when canceling
+    setUserLocation(null);
   };
 
   /**
@@ -234,7 +253,7 @@ const Home: React.FC = () => {
           <div className="modal-content">
             <PinDataForm 
               onSubmit={handleFormSubmit} 
-              onCancel={() => setShowForm(false)} 
+              onCancel={handleFormCancel} 
             />
           </div>
         </div>
@@ -242,7 +261,7 @@ const Home: React.FC = () => {
 
       <MapContainer 
         center={mapCenter} 
-        zoom={13} 
+        zoom={mapZoom} 
         className="map-container"
       >
         <TileLayer
@@ -273,7 +292,7 @@ const Home: React.FC = () => {
         )}
         
         {/* Component to automatically update the map's view */}
-        <MapUpdater userLocation={userLocation} />
+        <MapUpdater userLocation={userLocation} mapZoom={mapZoom} />
       </MapContainer>
     </div>
   );

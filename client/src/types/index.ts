@@ -76,6 +76,8 @@ export interface PinDataFormProps {
 export interface MapUpdaterProps {
   /** User's location as [latitude, longitude] */
   userLocation: LatLngTuple | null;
+  /** Zoom level for the map */
+  mapZoom?: number;
 }
 
 /**
