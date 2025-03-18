@@ -4,7 +4,9 @@ import { IOSControlsProps } from './types';
 /**
  * iOS-specific camera controls component
  * 
- * Uses file input with capture attribute for iOS devices
+ * Uses file input with capture attribute for iOS devices.
+ * On iOS, the gallery button already provides options to take photos or record videos,
+ * so we don't need a separate capture button.
  * 
  * @param {IOSControlsProps} props - Component props
  * @returns {JSX.Element} The rendered iOS controls
@@ -31,30 +33,25 @@ const IOSControls: React.FC<IOSControlsProps> = ({
   };
 
   return (
-    <>
-      {/* iOS uses file input with capture attribute */}
-      <button
-        className="ios-capture-button"
-        onClick={openFileSelection}
-      >
-        {isVideoMode ? 'Record Video' : captureButtonText}
-      </button>
-      
-      {/* Gallery button for iOS */}
+    <div className="camera-controls-container">
+      {/* Gallery button for iOS - serves as the primary way to capture media */}
       <button 
-        className="gallery-button" 
+        className="gallery-button ios-primary-button" 
         onClick={openGallery}
       >
-        {galleryButtonText}
+        {isVideoMode ? 'Select or Record Video' : 'Select or Take Photo'}
       </button>
       
       {/* Mode toggle for iOS */}
       {allowVideo && (
-        <button className="mode-toggle" onClick={toggleMode}>
+        <button 
+          className={`mode-toggle ${isVideoMode ? 'video-mode' : 'photo-mode'}`} 
+          onClick={toggleMode}
+        >
           Switch to {isVideoMode ? 'Photo' : 'Video'} Mode
         </button>
       )}
-    </>
+    </div>
   );
 };
 

@@ -22,38 +22,70 @@ export class CameraService {
     }
     
     try {
-      // First try with lower resolution for better compatibility
-      const constraints = {
+      // First try with highest possible resolution for best quality
+      const highResConstraints = {
         video: {
           facingMode: 'user', // Prefer front camera
-          width: { ideal: 640 }, // Start with lower resolution
-          height: { ideal: 480 },
+          width: { ideal: 1920 }, // Full HD resolution
+          height: { ideal: 1440 },
+          aspectRatio: { ideal: 4/3 }, // Match the container's aspect ratio
+          frameRate: { ideal: 30 }
         },
         audio: withAudio, // Only request audio for video recording
       };
       
-      console.log('Requesting camera with constraints:', JSON.stringify(constraints));
+      console.log('Requesting camera with high-res constraints:', JSON.stringify(highResConstraints));
       
-      // Request camera access
-      return await navigator.mediaDevices.getUserMedia(constraints);
+      try {
+        // Try highest resolution first
+        return await navigator.mediaDevices.getUserMedia(highResConstraints);
+      } catch (highResErr) {
+        console.warn('High resolution not supported, trying medium resolution');
+        
+        // Try medium resolution
+        const mediumResConstraints = {
+          video: {
+            facingMode: 'user',
+            width: { ideal: 1280 },
+            height: { ideal: 960 },
+            aspectRatio: { ideal: 4/3 },
+          },
+          audio: withAudio,
+        };
+        
+        try {
+          return await navigator.mediaDevices.getUserMedia(mediumResConstraints);
+        } catch (medResErr) {
+          console.warn('Medium resolution not supported, trying basic resolution');
+          
+          // Try basic resolution
+          const basicConstraints = {
+            video: {
+              facingMode: 'user',
+              width: { ideal: 640 },
+              height: { ideal: 480 },
+            },
+            audio: withAudio,
+          };
+          
+          return await navigator.mediaDevices.getUserMedia(basicConstraints);
+        }
+      }
     } catch (err) {
       console.error('Camera access error:', err);
       
-      // Try with basic constraints as fallback
-      if (err instanceof DOMException && err.name === 'OverconstrainedError') {
-        try {
-          console.log('Trying fallback with basic constraints');
-          return await navigator.mediaDevices.getUserMedia({
-            video: true,
-            audio: withAudio,
-          });
-        } catch (fallbackErr) {
-          console.error('Fallback camera access failed:', fallbackErr);
-        }
+      // Last resort - try with minimal constraints
+      try {
+        console.log('Trying fallback with minimal constraints');
+        return await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: withAudio,
+        });
+      } catch (fallbackErr) {
+        console.error('Fallback camera access failed:', fallbackErr);
+        // Re-throw the error for handling by the component
+        throw err;
       }
-      
-      // Re-throw the error for handling by the component
-      throw err;
     }
   }
 

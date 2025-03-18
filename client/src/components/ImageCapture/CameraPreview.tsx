@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CameraPreviewProps } from './types';
 import { formatTime } from './utils';
 
@@ -15,6 +15,9 @@ const CameraPreview: React.FC<CameraPreviewProps> = ({
   videoRef,
   onError
 }) => {
+  // Track if the video has loaded dimensions
+  const [videoLoaded, setVideoLoaded] = useState(false);
+
   // Set up video element when stream changes
   useEffect(() => {
     if (stream && videoRef.current) {
@@ -34,6 +37,9 @@ const CameraPreview: React.FC<CameraPreviewProps> = ({
         if (videoElement.videoWidth === 0 || videoElement.videoHeight === 0) {
           console.log('Video has zero dimensions after loading, trying to play explicitly');
           videoElement.play().catch(e => console.error('Could not play video:', e));
+        } else {
+          // Video has dimensions, mark as loaded
+          setVideoLoaded(true);
         }
       };
       
@@ -56,12 +62,33 @@ const CameraPreview: React.FC<CameraPreviewProps> = ({
         console.log('Using camera:', videoTracks[0].label);
         console.log('Camera settings:', videoTracks[0].getSettings());
         
+        // Force constraints to get the best possible stream
+        try {
+          videoTracks[0].applyConstraints({
+            width: { ideal: 1280 },
+            height: { ideal: 960 },
+            frameRate: { ideal: 30 }
+          }).then(() => {
+            console.log('Applied additional constraints successfully');
+          }).catch(e => {
+            console.warn('Could not apply optimal constraints:', e);
+          });
+        } catch (e) {
+          console.warn('Error applying constraints:', e);
+        }
+        
         // Monitor track state changes
         videoTracks[0].onended = () => {
           console.log('Camera track ended');
           onError('Camera connection lost. Please try again.');
         };
       }
+      
+      // Cleanup function
+      return () => {
+        videoElement.srcObject = null;
+        setVideoLoaded(false);
+      };
     }
   }, [stream, videoRef, onError]);
 
@@ -73,22 +100,35 @@ const CameraPreview: React.FC<CameraPreviewProps> = ({
         autoPlay
         playsInline
         muted
-        className="camera-preview"
+        className={`camera-preview ${videoLoaded ? 'video-loaded' : ''}`}
         onLoadedData={() => {
           console.log('Camera stream loaded, readyState:', videoRef.current?.readyState);
           console.log('Dimensions:', videoRef.current?.videoWidth, 'x', videoRef.current?.videoHeight);
+          setVideoLoaded(true);
         }}
         onError={() => {
           console.error('Video error event');
           onError('Error loading video stream');
         }}
-        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        style={{ 
+          width: '100%', 
+          height: '100%', 
+          objectFit: 'cover',
+          objectPosition: 'center',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          minWidth: '100%',
+          minHeight: '100%'
+        }}
         poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23333'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' text-anchor='middle' fill='%23fff'%3EInitializing camera...%3C/text%3E%3C/svg%3E"
       />
       
       {/* Camera readiness indicator */}
       <div className="camera-status">
-        {videoRef.current && videoRef.current.readyState < 2 && (
+        {!videoLoaded && (
           <div className="camera-loading">Initializing camera...</div>
         )}
       </div>

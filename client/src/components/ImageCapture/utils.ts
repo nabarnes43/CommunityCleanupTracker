@@ -19,6 +19,34 @@ export const isMacOS = (): boolean => {
 };
 
 /**
+ * Detects if the current device is a mobile device (iOS or Android)
+ * @returns {boolean} True if the device is a mobile device
+ */
+export const isMobile = (): boolean => {
+  // Check for iOS devices
+  const isIOSDevice = isIOS();
+  
+  // Check for Android devices
+  const isAndroidDevice = /Android/.test(navigator.userAgent);
+  
+  // Check for general mobile indicators
+  const hasMobileKeywords = /Mobile|iPhone|Android|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  // Check screen dimensions as an additional heuristic
+  const hasSmallScreen = window.innerWidth <= 768;
+  
+  return isIOSDevice || isAndroidDevice || (hasMobileKeywords && hasSmallScreen);
+};
+
+/**
+ * Detects if the current device is a desktop computer
+ * @returns {boolean} True if the device is a desktop computer
+ */
+export const isDesktop = (): boolean => {
+  return !isMobile();
+};
+
+/**
  * Formats recording time as MM:SS
  * @param {number} seconds - The recording time in seconds
  * @returns {string} Formatted time string

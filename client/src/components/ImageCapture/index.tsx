@@ -12,7 +12,7 @@ import ErrorHelp from './ErrorHelp';
 import MediaPreview from './MediaPreview';
 
 // Import utilities
-import { isIOS, getBestVideoMimeType } from './utils';
+import { isIOS, isMobile, getBestVideoMimeType } from './utils';
 import { CameraService } from './CameraService';
 
 /**
@@ -634,24 +634,33 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({
 
   // Determine if we should use iOS-specific controls
   const useIOSControls = isIOS();
+  const isMobileDevice = isMobile();
 
   return (
     <div className="image-capture">
       <div className="image-capture-container">
         {error && <div className="error-message">{error}</div>}
         
-        <div className="mode-indicator">
-          {isVideoMode ? 'Video Mode' : 'Photo Mode'}
-        </div>
-        
         {isCameraActive && (
-          <CameraPreview
-            stream={stream}
-            isRecording={isRecording}
-            recordingTime={recordingTime}
-            videoRef={videoRef}
-            onError={setError}
-          />
+          <div className="camera-preview-wrapper">
+            <div className="mode-indicator">
+              {isVideoMode ? 'Video Mode' : 'Photo Mode'}
+            </div>
+            
+            <CameraPreview
+              stream={stream}
+              isRecording={isRecording}
+              recordingTime={recordingTime}
+              videoRef={videoRef}
+              onError={setError}
+            />
+          </div>
+        )}
+        
+        {!isCameraActive && (
+          <div className="mode-indicator-standalone">
+            {isVideoMode ? 'Video Mode' : 'Photo Mode'}
+          </div>
         )}
         
         {!useIOSControls && !error && (
@@ -691,6 +700,13 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({
           multiple={allowMultiple}
           {...(useIOSControls ? { capture: isVideoMode ? "user" : "environment" } : {})}
         />
+        
+        {error && (
+          <ErrorHelp
+            error={error}
+            openFileSelection={openFileSelection}
+          />
+        )}
         
         {showPreview && capturedMedia.length > 0 && (
           <div className="media-preview-section">
