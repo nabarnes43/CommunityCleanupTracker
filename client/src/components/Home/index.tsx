@@ -416,7 +416,7 @@ const Home: React.FC = () => {
         </div>
       )}
 
-      {/* Debug information - hidden in production */}
+      {/* Debug information - hidden in production
       {process.env.NODE_ENV !== 'production' && (
         <div style={{ position: 'absolute', bottom: '10px', left: '10px', zIndex: 1000, background: 'rgba(255,255,255,0.8)', padding: '10px', fontSize: '12px', maxWidth: '300px', overflow: 'auto', maxHeight: '200px' }}>
           <strong>Debug Info:</strong><br/>
@@ -426,7 +426,7 @@ const Home: React.FC = () => {
           Pending Marker: {pendingMarker ? 'true' : 'false'}<br/>
           Map Zoom: {mapZoom}
         </div>
-      )}
+      )} */}
 
       <MapContainer 
         center={mapCenter} 

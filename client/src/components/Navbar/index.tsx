@@ -3,6 +3,33 @@ import { Link } from 'react-router-dom';
 import './Navbar.css';
 
 /**
+ * SVG component for the map icon 
+ * TODO make this its own navbar icon component in another filw ith the others
+ * Inlined from mapTab.svg for direct usage in the component
+ * 
+ * @returns {JSX.Element} The rendered SVG icon
+ */
+const MapTabIcon: React.FC = () => (
+  <svg width="24" height="24" viewBox="0 0 48 46" fill="none" xmlns="http://www.w3.org/2000/svg" className="map-tab-icon">
+    <g filter="url(#filter0_d_55_119)">
+      <path d="M16 34L2 42V10L16 2M16 34L32 42M16 34V2M32 42L46 34V2L32 10M32 42V10M32 10L16 2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" shape-rendering="crispEdges"/>
+    </g>
+    <defs>
+      <filter id="filter0_d_55_119" x="-3.25" y="0.75" width="54.5" height="50.5" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+        <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+        <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+        <feOffset dy="4"/>
+        <feGaussianBlur stdDeviation="2"/>
+        <feComposite in2="hardAlpha" operator="out"/>
+        <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+        <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_55_119"/>
+        <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_55_119" result="shape"/>
+      </filter>
+    </defs>
+  </svg>
+);
+
+/**
  * Navigation bar component that provides links to different sections of the application
  * Positioned at the bottom of the screen with responsive design for both mobile and desktop
  * 
@@ -34,7 +61,9 @@ const Navbar: React.FC = () => {
       <ul className="navbar-list">
         <li className="navbar-list-item">
           <Link to="/">
-            <div className="nav-icon">&#128506;</div>
+            <div className="nav-icon">
+              <MapTabIcon />
+            </div>
             <span className="nav-label">Map</span>
           </Link>
         </li>

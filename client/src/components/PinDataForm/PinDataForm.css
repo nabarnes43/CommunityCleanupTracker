@@ -45,42 +45,6 @@
     }
 }
 
-/* Cancel Button (X) */
-.modal-cancel-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: #f2f2f2;
-    border: none;
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-    color: #333;
-    z-index: 1001;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.modal-cancel-btn:hover {
-    background-color: #e0e0e0;
-}
-
-/* Adjust for mobile */
-@media (max-width: 767px) {
-    .modal-cancel-btn {
-        top: 8px;
-        right: 8px;
-        width: 32px;
-        height: 32px;
-        font-size: 16px;
-    }
-}
-
 /* Form Styling */
 .pin-form {
     display: flex;
@@ -152,16 +116,6 @@
     border-radius: 4px;
     cursor: pointer;
     margin-top: 5px;
-}
-
-/* Desktop-only styling for the cancel button */
-@media (min-width: 768px) {
-    .pin-form button[type="button"] {
-        width: 50%; /* Make it half the width */
-        margin-left: auto; /* Center it with auto margins */
-        margin-right: auto;
-        display: block; /* Required for margin auto to work */
-    }
 }
 
 .pin-form button[type="submit"]:hover {
@@ -241,9 +195,9 @@
     width: 100%;
     max-width: 500px; /* Limit maximum width */
     margin: 0 auto; /* Center the container */
-    height: auto;
-    display: flex;
-    flex-direction: column;
+    position: relative; /* Add position relative */
+    height: 0; /* Reset height */
+    padding-bottom: 75%; /* Use aspect ratio padding trick (4:3 = 75%) */
     border-radius: 8px;
     overflow: hidden;
     background-color: #000;
@@ -253,10 +207,10 @@
 /* Camera preview - make it fit properly */
 .camera-preview {
     width: 100%;
-    height: auto;
-    aspect-ratio: 4/3;
-    max-height: 250px;
-
+    height: 100%;
+    position: absolute; /* Position absolutely within container */
+    top: 0;
+    left: 0;
     display: block;
     object-fit: cover; /* Ensure the video fills the container */
     z-index: 1; /* Ensure it's above background */

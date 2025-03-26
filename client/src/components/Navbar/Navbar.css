@@ -63,6 +63,16 @@
 .nav-icon {
   font-size: 20px;
   margin-bottom: 1px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* SVG icon styling */
+.map-tab-icon {
+  color: white;
+  width: 24px;
+  height: 24px;
 }
 
 .nav-label {
@@ -81,6 +91,11 @@
   font-size: 14px;
 }
 
+.navbar.mobile .map-tab-icon {
+  width: 18px;
+  height: 18px;
+}
+
 .navbar.mobile .nav-label {
   font-size: 10px;
 }
@@ -93,6 +108,11 @@
 
 .navbar.desktop .nav-icon {
   font-size: 18px;
+}
+
+.navbar.desktop .map-tab-icon {
+  width: 22px;
+  height: 22px;
 }
 
 .navbar.desktop .nav-label {
