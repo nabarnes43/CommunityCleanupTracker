@@ -53,15 +53,17 @@ debug.log
 # Firebase
 .firebase/
 *firebase-adminsdk*.json
+firebase-credentials.json
+firebase-credentials
 
 # Environment and configuration
 .env
 client/.env.production
 client/.env.development
 server/config.js
+server/.env
 server/credentials/
 server/config/email.js
-server/config/firebase.js
 .env.local
 .env.development.local
 .env.test.local

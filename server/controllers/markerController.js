@@ -4,7 +4,7 @@
  * @module controllers/markerController
  */
 
-const { admin, Markers, storage } = require('../config');
+const { admin, getMarkers, getStorage } = require('../config');
 const logger = require('../utils/logger');
 
 /**
@@ -17,6 +17,7 @@ const logger = require('../utils/logger');
  */
 const getAllMarkers = async (req, res) => {
   const reqLogger = req.logger || logger;
+  const Markers = getMarkers(); // Get Markers reference when needed
   
   try {
     reqLogger.info('Fetching all markers');
@@ -77,7 +78,8 @@ const getAllMarkers = async (req, res) => {
  * @returns {Promise<string>} - Public URL of the uploaded file
  */
 const uploadFileToStorage = async (file, folderPath, reqLogger) => {
-  const bucket = admin.storage().bucket();
+  const storage = getStorage();
+  const bucket = storage.bucket();
   const fileName = `${folderPath}/${Date.now()}_${file.originalname}`;
   const fileUpload = bucket.file(fileName);
 
@@ -120,6 +122,7 @@ const uploadFileToStorage = async (file, folderPath, reqLogger) => {
  */
 const saveMarker = async (req, res) => {
   const reqLogger = req.logger || logger;
+  const Markers = getMarkers(); // Get Markers reference when needed
   
   try {
     const {
@@ -258,4 +261,4 @@ const saveMarker = async (req, res) => {
 module.exports = {
   getAllMarkers,
   saveMarker
-}; 
+};

@@ -8,11 +8,10 @@ COPY package*.json ./
 
 # Install dependencies including devDependencies
 RUN npm install && \
-    npm install firebase-admin axios express-request-id
+    npm install firebase-admin axios express-request-id @google-cloud/secret-manager
 
-# Copy server source code and credentials
+# Copy server source code
 COPY . .
-COPY credentials ./credentials/
 
 # Set environment variables
 ENV PORT=8080

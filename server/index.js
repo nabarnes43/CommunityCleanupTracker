@@ -10,7 +10,7 @@ const dotenv = require('dotenv');
 // const addRequestId = require('express-request-id')();
 const routes = require('./router'); // Import main router
 const logger = require('./utils/logger');
-// Firebase is initialized automatically when imported in config/firebase.js
+const { initializeFirebase} = require('./config/firebase');
 
 // Middleware imports
 const requestLoggerMiddleware = require('./middleware/requestLogger');
@@ -44,7 +44,7 @@ app.options('*', cors());
 app.use(requestLoggerMiddleware);
 
 // Use routes - mount at root level since router.js handles base paths
-app.use('/', routes); 
+app.use('/', routes);
 
 // 404 Not Found handler
 app.use(notFoundHandler);
@@ -63,6 +63,10 @@ const PORT = process.env.PORT || 4000;
  */
 async function startServer() {
   try {
+    // Initialize Firebase first
+    
+    await initializeFirebase();
+    
     // Dynamically import express-request-id
     const expressRequestId = await import('express-request-id');
     const addRequestId = expressRequestId.default();
