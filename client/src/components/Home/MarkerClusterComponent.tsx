@@ -92,7 +92,9 @@ const MarkerClusterComponent: React.FC<MarkerClusterProps> = ({ markers }) => {
             .bindPopup(popupContent, {
               maxWidth: 300,
               maxHeight: 400,
-              autoPanPadding: [50, 50]
+              autoPanPadding: [50, 50],
+              closeButton: true,
+              className: 'custom-popup'
             })
             .addTo(markerClusterGroup);
         } else {
@@ -104,9 +106,9 @@ const MarkerClusterComponent: React.FC<MarkerClusterProps> = ({ markers }) => {
       map.addLayer(markerClusterGroup);
     }
 
-    // Cleanup function
+    // Clean up when component unmounts
     return () => {
-      if (map.hasLayer(markerClusterGroup)) {
+      if (map && markerClusterGroup) {
         map.removeLayer(markerClusterGroup);
       }
     };

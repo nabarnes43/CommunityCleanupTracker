@@ -94,17 +94,6 @@ const CameraControls: React.FC<CameraControlsProps> = ({
           Switch to {isVideoMode ? 'Photo' : 'Video'} Mode
         </button>
       )}
-      
-      {/* Close camera button - only when camera is active */}
-      {isCameraActive && (
-        <button 
-          className="stop-camera-button"
-          onClick={stopCamera}
-          disabled={isRecording}
-        >
-          Close Camera
-        </button>
-      )}
     </div>
   );
 };

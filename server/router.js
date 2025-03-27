@@ -15,7 +15,7 @@ const emailRoutes = require('./routes/emailRoutes');
 // Import utility controller for API test
 const { apiTest } = require('./controllers/utilController');
 
-// Base API routes
+// Base route
 router.get('/', (req, res) => {
   res.json({
     name: 'Community Cleanup Tracker API',
@@ -24,12 +24,18 @@ router.get('/', (req, res) => {
   });
 });
 
-// API test route
-router.get('/api', apiTest);
+// Create API router to group all API routes
+const apiRouter = express.Router();
 
-// Mount route modules - no versioning
-router.use('/users', userRoutes);
-router.use('/markers', markerRoutes);
-router.use('/email', emailRoutes);
+// API test route
+apiRouter.get('/', apiTest);
+
+// Mount route modules under API router
+apiRouter.use('/users', userRoutes);
+apiRouter.use('/markers', markerRoutes);
+apiRouter.use('/email', emailRoutes);
+
+// Mount API router under /api path
+router.use('/api', apiRouter);
 
 module.exports = router;

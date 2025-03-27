@@ -1,24 +1,131 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
-/node_modules
+# Dependencies
+# Node modules
+**/node_modules/
+node_modules/
 /.pnp
 .pnp.js
-node_modules
-server/config.js
 server/node_modules
 client/node_modules
-.DS_Store
+bower_components
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.env/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
 
-# Sensitive files and credentials
+# Build and compiled files
+build/Release
+*.tgz
+.grunt
+.lock-wscript
+dist/
+build/
+*.egg-info/
+*.egg
+MANIFEST
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Logs and debugging
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+firebase-debug.log*
+firebase-debug.*.log*
+server/utils/logs/
+*.log.*
+debug.log
+
+# Firebase
+.firebase/
+*firebase-adminsdk*.json
+
+# Environment and configuration
+.env
+client/.env.production
+client/.env.development
+server/config.js
 server/credentials/
 server/config/email.js
 server/config/firebase.js
-server/utils/logs/
-.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
 
-# Firebase service account
-*firebase-adminsdk*.json
+# Testing and coverage
+coverage/
+.nyc_output
+lib-cov
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
 
-# Log files
-*.log
+# Cache and temporary files
+.npm
+.eslintcache
+.node_repl_history
+.DS_Store
+pids
+*.pid
+*.seed
+*.pid.lock
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+*.temp
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+.vs/
+*.code-workspace
+
+# Yarn
+.yarn-integrity
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# System Files
+.DS_Store
+Thumbs.db
+desktop.ini

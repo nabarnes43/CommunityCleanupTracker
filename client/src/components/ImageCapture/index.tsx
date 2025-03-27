@@ -647,6 +647,15 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({
               {isVideoMode ? 'Video Mode' : 'Photo Mode'}
             </div>
             
+            <button 
+              className="close-camera-button"
+              onClick={stopCamera}
+              disabled={isRecording}
+              aria-label="Close camera"
+            >
+              ×
+            </button>
+            
             <CameraPreview
               stream={stream}
               isRecording={isRecording}
