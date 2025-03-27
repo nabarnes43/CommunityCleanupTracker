@@ -8,7 +8,7 @@ import MarkerClusterComponent from './MarkerClusterComponent';
 import { newMarkerIcon, customIcon } from './mapIcons';
 import { Marker as MarkerType } from '../../types';
 import { LatLngTuple } from 'leaflet';
-
+import { fetchMarkers, createMarker } from '../../apiService';
 /**
  * Home component that displays the map and allows users to add markers
  * 
@@ -33,28 +33,21 @@ const Home: React.FC = () => {
    * Fetch existing markers from the backend when the component mounts
    */
   useEffect(() => {
-    const fetchMarkers = async () => {
+    const fetchMarkersData = async () => {
       try {
-        // Use relative URL which will work with any domain
-        const response = await fetch('/markers');
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Fetched markers:', data); // Debug log
-          if (!Array.isArray(data)) {
-            console.error('Expected array of markers, got:', typeof data);
-            return;
-          }
-          setMarkers(data);
-        } else {
-          const errorData = await response.json();
-          console.error('Error fetching markers:', errorData);
+        const data = await fetchMarkers();
+        console.log('Fetched markers:', data);
+        if (!Array.isArray(data)) {
+          console.error('Expected array of markers, got:', typeof data);
+          return;
         }
+        setMarkers(data);
       } catch (error) {
         console.error('Fetch error:', error);
       }
     };
   
-    fetchMarkers();
+    fetchMarkersData();
   }, []);
 
   /**
@@ -309,64 +302,29 @@ const Home: React.FC = () => {
       console.log('Location added to form data:', location);
       console.log('Sending request to /markers/create');
       
-      // Send the FormData to the backend
-      const response = await fetch('/markers/create', {
-        method: 'POST',
-        body: formDataToSend,
-        // Do NOT set Content-Type when sending FormData
-      });
-
-      console.log('Response status:', response.status);
+      // Use the API service to create the marker
+      await createMarker(formDataToSend);
+      console.log('Marker saved successfully!');
       
-      if (response.ok) {
-        console.log('Marker saved successfully!');
-        
-        // Refresh markers after adding a new one
-        console.log('Fetching updated markers');
-        const markersResponse = await fetch('/markers');
-        if (markersResponse.ok) {
-          const data = await markersResponse.json();
-          console.log('Updated markers received:', data);
-          setMarkers(data);
-          
-          // Keep the pending marker active so user knows which one they just added
-          // But turn off submission state to indicate successful save
-          setIsSubmitting(false);
-          
-          // After 5 seconds, clear the pending marker highlight
-          setTimeout(() => {
-            setPendingMarker(null);
-          }, 5000);
-        } else {
-          console.error('Failed to fetch updated markers:', markersResponse.status);
-          const errorText = await markersResponse.text();
-          console.error('Error response:', errorText);
-          
-          // Reset submission state but keep pending marker visible
-          setIsSubmitting(false);
-        }
-      } else {
-        console.error('Error saving marker:', response.status);
-        // Try to get error details
-        try {
-          const errorResponse = await response.json();
-          console.error('Error details:', errorResponse);
-        } catch (e) {
-          // If JSON parsing fails, get the raw text
-          const errorText = await response.text();
-          console.error('Error response text:', errorText);
-        }
-        
-        // Reset submission state but keep pending marker visible to show failure
-        setIsSubmitting(false);
-        
-        // Alert the user about the failure
-        alert('Failed to save your marker. Please try again.');
-      }
-    } catch (error) {
-      console.error('Network or other error:', error);
+      // Refresh markers after adding a new one
+      console.log('Fetching updated markers');
+      const updatedMarkers = await fetchMarkers();
+      console.log('Updated markers received:', updatedMarkers);
+      setMarkers(updatedMarkers);
+      
+      // Keep the pending marker active so user knows which one they just added
+      // But turn off submission state to indicate successful save
       setIsSubmitting(false);
-      alert('Network error occurred while saving your marker. Please check your connection and try again.');
+      
+      // After 5 seconds, clear the pending marker highlight
+      setTimeout(() => {
+        setPendingMarker(null);
+      }, 5000);
+      
+    } catch (error) {
+      console.error('Error saving marker:', error);
+      setIsSubmitting(false);
+      alert('Failed to save your marker. Please try again.');
     }
   };
 
