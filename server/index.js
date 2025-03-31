@@ -11,6 +11,7 @@ const dotenv = require('dotenv');
 const routes = require('./router'); // Import main router
 const logger = require('./utils/logger');
 const { initializeFirebase} = require('./config/firebase');
+const admin = require('firebase-admin');
 
 // Middleware imports
 const requestLoggerMiddleware = require('./middleware/requestLogger');
@@ -53,7 +54,15 @@ app.use('/', routes);
 
 // Health check endpoint
 app.get('/healthz', (req, res) => {
-  res.status(200).send('OK');
+  const healthStatus = {
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'not set',
+    port: process.env.PORT || 'not set',
+    firebaseInitialized: Boolean(admin?.apps?.length > 0)
+  };
+  
+  res.status(200).json(healthStatus);
 });
 
 // 404 Not Found handler
@@ -76,8 +85,18 @@ async function startServer() {
   try {
     // Initialize Firebase first
     console.log('Initializing Firebase...');
-    await initializeFirebase();
-    console.log('Firebase initialized successfully');
+    try {
+      await initializeFirebase();
+      console.log('Firebase initialized successfully');
+    } catch (firebaseError) {
+      // Log the error but don't exit - in Cloud Run, we want to start the server anyway
+      console.error('Firebase initialization failed:', firebaseError.message);
+      logger.error('Server starting without Firebase initialization', {
+        error: firebaseError.message,
+        environment: process.env.NODE_ENV
+      });
+      // In production, we'll still start the server but certain endpoints might fail
+    }
     
     try {
       // Dynamically import express-request-id
@@ -111,8 +130,30 @@ async function startServer() {
     return server;
   } catch (error) {
     console.error('FATAL: Failed to start server:', error);
+    logger.error('Failed to start server', {
+      error: error.message,
+      stack: error.stack,
+      environment: process.env.NODE_ENV
+    });
     // Don't exit immediately in production to allow logs to be captured
-    setTimeout(() => process.exit(1), 5000);
+    if (process.env.NODE_ENV === 'production') {
+      // In Cloud Run, we'll log the error but still try to start a minimal server
+      // This prevents the container from exiting with code 1
+      try {
+        const minimalServer = app.listen(PORT, () => {
+          console.log(`MINIMAL SERVER RUNNING on port ${PORT} (Firebase failed)`);
+          logger.info('Minimal server running - Firebase initialization failed');
+        });
+        return minimalServer;
+      } catch (serverError) {
+        logger.error('Even minimal server failed to start', { error: serverError.message });
+        // Wait 5 seconds before exiting to ensure logs are captured
+        setTimeout(() => process.exit(1), 5000);
+      }
+    } else {
+      // In development, exit immediately
+      process.exit(1);
+    }
   }
 }
 
