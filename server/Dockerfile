@@ -16,10 +16,11 @@ COPY . .
 # Set environment variables
 ENV PORT=8080
 ENV NODE_ENV=production
+ENV GOOGLE_CLOUD_PROJECT=gmail-api-test-427120
 
 # Your app binds to port 8080 so you'll use the EXPOSE instruction
 EXPOSE 8080
 
 # Define the command to run your app
-# Using nodemon for development with hot reloading
+# Using npm start to run the application
 CMD [ "npm", "start" ] 
