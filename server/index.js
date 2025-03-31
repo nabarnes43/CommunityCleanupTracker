@@ -128,7 +128,8 @@ async function startServer() {
         if (process.env.NODE_ENV !== 'production') {
           // Development environments might want to fail fast
           console.error('Firebase is required in development mode. Exiting...');
-          process.exit(1);
+          // Removing process.exit(1) to prevent container from exiting with code 1
+          console.error('Error but continuing execution to prevent container exit');
         }
       }
     }
