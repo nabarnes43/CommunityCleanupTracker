@@ -22,4 +22,4 @@ EXPOSE 8080
 
 # Define the command to run your app
 # Using nodemon for development with hot reloading
-CMD [ "npm", "run", "dev" ] 
+CMD [ "npm", "start" ] 
