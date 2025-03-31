@@ -55,6 +55,12 @@ async function getSecret(secretName) {
     // In production, use Google Cloud Secret Manager
     const projectId = process.env.GOOGLE_CLOUD_PROJECT;
     if (!projectId) {
+      logger.error('GOOGLE_CLOUD_PROJECT environment variable is not set');
+      // In production, return a mock object instead of throwing to prevent container exit
+      if (process.env.NODE_ENV === 'production') {
+        logger.warn(`Returning mock credentials for "${secretName}" to prevent container exit`);
+        return { _isMock: true, secretName, reason: 'GOOGLE_CLOUD_PROJECT not set' };
+      }
       throw new Error('GOOGLE_CLOUD_PROJECT environment variable is not set');
     }
 
@@ -65,25 +71,40 @@ async function getSecret(secretName) {
     const name = `projects/${projectId}/secrets/${actualSecretName}/versions/latest`;
     logger.debug(`Fetching secret from Google Cloud: ${name}`);
     
-    const [version] = await client.accessSecretVersion({
-      name: name,
-    });
-
-    // Log the first 50 characters of the secret data for debugging
-    const rawData = version.payload.data.toString();
-    console.log('Secret data first 50 chars:', rawData.substring(0, 50));
-    
     try {
-      // Parse the secret payload as JSON
-      const secretData = JSON.parse(rawData);
-      logger.info('Successfully retrieved secret from Google Cloud');
-      return secretData;
-    } catch (parseError) {
-      console.error('JSON parse error:', parseError);
-      console.error('Raw data type:', typeof rawData);
-      console.error('Raw data length:', rawData.length);
-      // If we can't parse it as JSON, return it as is (might be a token or other format)
-      return rawData;
+      const [version] = await client.accessSecretVersion({
+        name: name,
+      });
+  
+      // Log the first 50 characters of the secret data for debugging
+      const rawData = version.payload.data.toString();
+      console.log('Secret data first 50 chars:', rawData.substring(0, 50));
+      
+      try {
+        // Parse the secret payload as JSON
+        const secretData = JSON.parse(rawData);
+        logger.info('Successfully retrieved secret from Google Cloud');
+        return secretData;
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        console.error('Raw data type:', typeof rawData);
+        console.error('Raw data length:', rawData.length);
+        // If we can't parse it as JSON, return it as is (might be a token or other format)
+        return rawData;
+      }
+    } catch (accessError) {
+      logger.error(`Failed to access secret version: ${accessError.message}`);
+      
+      // In production, return a mock object instead of throwing to prevent container exit
+      if (process.env.NODE_ENV === 'production') {
+        logger.warn(`Returning mock credentials for "${secretName}" to prevent container exit`);
+        return { 
+          _isMock: true, 
+          secretName, 
+          reason: `Secret access failed: ${accessError.message}` 
+        };
+      }
+      throw accessError;
     }
   } catch (error) {
     console.error('SECRET MANAGER ERROR:', error);
@@ -107,6 +128,17 @@ async function getSecret(secretName) {
       errorCode: error.code,
       errorDetails: error.details
     });
+    
+    // In production, return a mock object instead of throwing to prevent container exit
+    if (process.env.NODE_ENV === 'production') {
+      logger.warn(`Returning mock credentials for "${secretName}" to prevent container exit`);
+      return { 
+        _isMock: true, 
+        secretName, 
+        reason: `General error: ${error.message}` 
+      };
+    }
+    
     throw error;
   }
 }

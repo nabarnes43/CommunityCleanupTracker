@@ -23,6 +23,19 @@ async function initializeFirebase() {
     const serviceAccount = await getSecret('firebase-credentials');
     logger.debug('Firebase credentials retrieved successfully');
 
+    // Check if we got mock credentials (used in production when secret access fails)
+    if (serviceAccount && serviceAccount._isMock === true) {
+      logger.warn(`Using mock Firebase credentials: ${serviceAccount.reason}`);
+      
+      // In production, we'll continue with a limited server
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error(`Cannot initialize Firebase with mock credentials: ${serviceAccount.reason}`);
+      } else {
+        // In non-production, exit the process
+        throw new Error(`Cannot initialize Firebase with mock credentials: ${serviceAccount.reason}`);
+      }
+    }
+
     // Initialize Firebase Admin SDK
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),

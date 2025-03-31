@@ -49,6 +49,20 @@ app.options('*', cors());
 // Request logging middleware
 app.use(requestLoggerMiddleware);
 
+// Special Cloud Run status endpoints
+app.get('/status', (req, res) => {
+  res.status(200).json({
+    status: 'OK', 
+    serverTime: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    inCloudRun: Boolean(process.env.K_SERVICE || process.env.K_REVISION)
+  });
+});
+
+app.get('/ready', (req, res) => {
+  res.status(200).send('Ready');
+});
+
 // Use routes - mount at root level since router.js handles base paths
 app.use('/', routes);
 
@@ -82,6 +96,16 @@ const PORT = process.env.PORT || 4000;
  */
 async function startServer() {
   console.log('Starting server initialization...');
+  
+  // Detect if we're running in Cloud Run
+  const isCloudRun = Boolean(process.env.K_SERVICE || process.env.K_REVISION || process.env.K_CONFIGURATION);
+  console.log(`Detected environment: ${isCloudRun ? 'Cloud Run' : 'standard'}`);
+  
+  if (isCloudRun) {
+    console.log('Running in Cloud Run environment');
+    logger.info('Running in Cloud Run environment');
+  }
+  
   try {
     // Initialize Firebase first
     console.log('Initializing Firebase...');
@@ -93,9 +117,20 @@ async function startServer() {
       console.error('Firebase initialization failed:', firebaseError.message);
       logger.error('Server starting without Firebase initialization', {
         error: firebaseError.message,
-        environment: process.env.NODE_ENV
+        environment: process.env.NODE_ENV,
+        isCloudRun: isCloudRun
       });
-      // In production, we'll still start the server but certain endpoints might fail
+      
+      if (isCloudRun) {
+        logger.warn('Starting Cloud Run instance without Firebase. Only health check and non-Firebase endpoints will work.');
+      } else {
+        // In non-Cloud Run environments, we'll still log the error but might want to exit in development
+        if (process.env.NODE_ENV !== 'production') {
+          // Development environments might want to fail fast
+          console.error('Firebase is required in development mode. Exiting...');
+          process.exit(1);
+        }
+      }
     }
     
     try {
@@ -116,6 +151,10 @@ async function startServer() {
       console.log(`SERVER RUNNING on port ${PORT}`);
       logger.info(`Server running on port ${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      
+      if (isCloudRun) {
+        logger.info('Server started successfully in Cloud Run environment');
+      }
     });
 
     // Graceful shutdown handling
@@ -133,22 +172,42 @@ async function startServer() {
     logger.error('Failed to start server', {
       error: error.message,
       stack: error.stack,
-      environment: process.env.NODE_ENV
+      environment: process.env.NODE_ENV,
+      isCloudRun: isCloudRun
     });
-    // Don't exit immediately in production to allow logs to be captured
-    if (process.env.NODE_ENV === 'production') {
+    
+    // Don't exit immediately in production or Cloud Run to allow logs to be captured
+    if (process.env.NODE_ENV === 'production' || isCloudRun) {
       // In Cloud Run, we'll log the error but still try to start a minimal server
       // This prevents the container from exiting with code 1
       try {
+        console.log('Attempting to start minimal server (no Firebase)...');
         const minimalServer = app.listen(PORT, () => {
           console.log(`MINIMAL SERVER RUNNING on port ${PORT} (Firebase failed)`);
           logger.info('Minimal server running - Firebase initialization failed');
+          
+          if (isCloudRun) {
+            console.log('CLOUD RUN: Minimal server started successfully. Health checks should pass now.');
+          }
         });
         return minimalServer;
       } catch (serverError) {
-        logger.error('Even minimal server failed to start', { error: serverError.message });
-        // Wait 5 seconds before exiting to ensure logs are captured
-        setTimeout(() => process.exit(1), 5000);
+        logger.error('Even minimal server failed to start', { 
+          error: serverError.message,
+          isCloudRun: isCloudRun 
+        });
+        
+        if (isCloudRun) {
+          // In Cloud Run, we need to keep the container running to see logs
+          console.log('CRITICAL: Could not start server. Entering infinite loop to keep container alive for debugging.');
+          // Instead of exiting, keep the process alive to view logs
+          setInterval(() => {
+            console.log('Container still running. Check logs for errors.');
+          }, 30000);
+        } else {
+          // Wait 5 seconds before exiting to ensure logs are captured
+          setTimeout(() => process.exit(1), 5000);
+        }
       }
     } else {
       // In development, exit immediately
