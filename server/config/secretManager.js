@@ -13,7 +13,7 @@ const client = new SecretManagerServiceClient();
 
 // Map internal secret names to the actual secret names in Secret Manager
 const SECRET_NAME_MAP = {
-  'firebase-credentials': 'firebase-app-hosting-github-oauth-github-oauthtoken-d5eb75'
+  // No mapping needed - the secret name matches what we're looking for
 };
 
 /**
@@ -69,11 +69,31 @@ async function getSecret(secretName) {
       name: name,
     });
 
-    // Parse the secret payload as JSON
-    const secretData = JSON.parse(version.payload.data.toString());
-    logger.info('Successfully retrieved secret from Google Cloud');
-    return secretData;
+    // Log the first 50 characters of the secret data for debugging
+    const rawData = version.payload.data.toString();
+    console.log('Secret data first 50 chars:', rawData.substring(0, 50));
+    
+    try {
+      // Parse the secret payload as JSON
+      const secretData = JSON.parse(rawData);
+      logger.info('Successfully retrieved secret from Google Cloud');
+      return secretData;
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      console.error('Raw data type:', typeof rawData);
+      console.error('Raw data length:', rawData.length);
+      // If we can't parse it as JSON, return it as is (might be a token or other format)
+      return rawData;
+    }
   } catch (error) {
+    console.error('SECRET MANAGER ERROR:', error);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    console.error('Environment:', process.env.NODE_ENV);
+    console.error('Project ID:', process.env.GOOGLE_CLOUD_PROJECT);
+    console.error('Secret Name:', secretName);
+    console.error('Mapped Secret Name:', SECRET_NAME_MAP[secretName] || secretName);
+    
     logger.error('Error retrieving secret:', { 
       error: error.message, 
       secretName,

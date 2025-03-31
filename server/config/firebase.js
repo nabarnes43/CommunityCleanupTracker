@@ -31,6 +31,9 @@ async function initializeFirebase() {
 
     logger.info("Firebase Admin SDK initialized successfully");
   } catch (error) {
+    console.error('FIREBASE INITIALIZATION ERROR:', error);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
     logger.error("Failed to initialize Firebase Admin SDK", { error: error.message, stack: error.stack });
     process.exit(1); // Exit the process if Firebase can't be initialized
   }
