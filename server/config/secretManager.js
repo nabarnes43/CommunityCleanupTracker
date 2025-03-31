@@ -19,7 +19,7 @@ const SECRET_NAME_MAP = {
 /**
  * Retrieves a secret from either local credentials or Google Cloud Secret Manager
  * @param {string} secretName - Name of the secret to retrieve
- * @returns {Promise<object>} The secret payload
+ * @returns {Promise<object>} The secret payload or mock data if error occurs
  */
 async function getSecret(secretName) {
   try {
@@ -38,30 +38,51 @@ async function getSecret(secretName) {
       logger.debug(`Looking for credentials at: ${credentialsPath}`);
       
       if (!fs.existsSync(credentialsPath)) {
-        const error = new Error(`Local credentials file not found: ${credentialsPath}`);
+        const errorMessage = `Local credentials file not found: ${credentialsPath}`;
         logger.error('Credentials file not found', {
           path: credentialsPath,
           secretName,
           environment: process.env.NODE_ENV
         });
-        throw error;
+        
+        // Return mock object instead of throwing
+        return { 
+          _isMock: true, 
+          secretName, 
+          reason: errorMessage 
+        };
       }
 
-      const credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
-      logger.info('Successfully loaded local credentials for:', secretName);
-      return credentials;
+      try {
+        const credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
+        logger.info('Successfully loaded local credentials for:', secretName);
+        return credentials;
+      } catch (readError) {
+        logger.error('Failed to read local credentials', {
+          error: readError.message,
+          path: credentialsPath
+        });
+        
+        // Return mock object instead of throwing
+        return { 
+          _isMock: true, 
+          secretName, 
+          reason: `Failed to read local credentials: ${readError.message}`
+        };
+      }
     }
 
     // In production, use Google Cloud Secret Manager
     const projectId = process.env.GOOGLE_CLOUD_PROJECT;
     if (!projectId) {
       logger.error('GOOGLE_CLOUD_PROJECT environment variable is not set');
-      // In production, return a mock object instead of throwing to prevent container exit
-      if (process.env.NODE_ENV === 'production') {
-        logger.warn(`Returning mock credentials for "${secretName}" to prevent container exit`);
-        return { _isMock: true, secretName, reason: 'GOOGLE_CLOUD_PROJECT not set' };
-      }
-      throw new Error('GOOGLE_CLOUD_PROJECT environment variable is not set');
+      // Return mock object instead of throwing
+      logger.warn(`Returning mock credentials for "${secretName}" due to missing GOOGLE_CLOUD_PROJECT`);
+      return { 
+        _isMock: true, 
+        secretName, 
+        reason: 'GOOGLE_CLOUD_PROJECT not set' 
+      };
     }
 
     // Map the internal secret name to the actual secret name in Secret Manager
@@ -95,16 +116,13 @@ async function getSecret(secretName) {
     } catch (accessError) {
       logger.error(`Failed to access secret version: ${accessError.message}`);
       
-      // In production, return a mock object instead of throwing to prevent container exit
-      if (process.env.NODE_ENV === 'production') {
-        logger.warn(`Returning mock credentials for "${secretName}" to prevent container exit`);
-        return { 
-          _isMock: true, 
-          secretName, 
-          reason: `Secret access failed: ${accessError.message}` 
-        };
-      }
-      throw accessError;
+      // Return mock object instead of throwing
+      logger.warn(`Returning mock credentials for "${secretName}" due to secret access failure`);
+      return { 
+        _isMock: true, 
+        secretName, 
+        reason: `Secret access failed: ${accessError.message}` 
+      };
     }
   } catch (error) {
     console.error('SECRET MANAGER ERROR:', error);
@@ -129,17 +147,13 @@ async function getSecret(secretName) {
       errorDetails: error.details
     });
     
-    // In production, return a mock object instead of throwing to prevent container exit
-    if (process.env.NODE_ENV === 'production') {
-      logger.warn(`Returning mock credentials for "${secretName}" to prevent container exit`);
-      return { 
-        _isMock: true, 
-        secretName, 
-        reason: `General error: ${error.message}` 
-      };
-    }
-    
-    throw error;
+    // Always return a mock object instead of throwing
+    logger.warn(`Returning mock credentials for "${secretName}" due to general error`);
+    return { 
+      _isMock: true, 
+      secretName, 
+      reason: `General error: ${error.message}` 
+    };
   }
 }
 

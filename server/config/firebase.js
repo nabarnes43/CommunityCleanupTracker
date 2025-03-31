@@ -10,7 +10,7 @@ let Markers;
 
 /**
  * Initializes Firebase and sets up all Firebase services
- * @returns {Promise<void>}
+ * @returns {Promise<Object>} Result with success status and error message if applicable
  */
 async function initializeFirebase() {
   try {
@@ -27,13 +27,11 @@ async function initializeFirebase() {
     if (serviceAccount && serviceAccount._isMock === true) {
       logger.warn(`Using mock Firebase credentials: ${serviceAccount.reason}`);
       
-      // In production, we'll continue with a limited server
-      if (process.env.NODE_ENV === 'production') {
-        throw new Error(`Cannot initialize Firebase with mock credentials: ${serviceAccount.reason}`);
-      } else {
-        // In non-production, exit the process
-        throw new Error(`Cannot initialize Firebase with mock credentials: ${serviceAccount.reason}`);
-      }
+      // Return error object instead of throwing
+      return {
+        success: false,
+        error: `Cannot initialize Firebase with mock credentials: ${serviceAccount.reason}`
+      };
     }
 
     // Initialize Firebase Admin SDK
@@ -49,6 +47,7 @@ async function initializeFirebase() {
     Markers = db.collection("Markers");
 
     logger.info("Firebase Admin SDK initialized successfully");
+    return { success: true };
   } catch (error) {
     console.error('FIREBASE INITIALIZATION ERROR:', error);
     console.error('Error message:', error.message);
@@ -60,9 +59,11 @@ async function initializeFirebase() {
       projectId: process.env.GOOGLE_CLOUD_PROJECT,
     });
     
-    // Don't exit immediately in production - this causes the container to fail
-    // Instead, throw an error that can be caught upstream
-    throw new Error(`Firebase initialization failed: ${error.message}`);
+    // Return error object instead of throwing
+    return {
+      success: false,
+      error: `Firebase initialization failed: ${error.message}`
+    };
   }
 }
 
