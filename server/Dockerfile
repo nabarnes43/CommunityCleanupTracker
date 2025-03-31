@@ -18,6 +18,14 @@ ENV PORT=8080
 ENV NODE_ENV=production
 ENV GOOGLE_CLOUD_PROJECT=gmail-api-test-427120
 
+# Add debug logs to container startup
+RUN echo "set -x" > /startup.sh && \
+    echo "echo 'Starting container...'" >> /startup.sh && \
+    echo "echo 'Environment: NODE_ENV='\$NODE_ENV" >> /startup.sh && \
+    echo "echo 'Port: PORT='\$PORT" >> /startup.sh && \
+    echo "npm start" >> /startup.sh && \
+    chmod +x /startup.sh
+
 # Your app binds to port 8080 so you'll use the EXPOSE instruction
 EXPOSE 8080
 

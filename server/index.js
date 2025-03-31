@@ -19,6 +19,11 @@ const { notFoundHandler, serverErrorHandler } = require('./middleware/errorHandl
 // Load environment variables
 dotenv.config();
 
+// Debug logs
+console.log('=== SERVER STARTING ===');
+console.log(`PORT: ${process.env.PORT || 'not set'}`);
+console.log(`NODE_ENV: ${process.env.NODE_ENV || 'not set'}`);
+
 /**
  * Express application instance
  * @type {express.Application}
@@ -46,6 +51,11 @@ app.use(requestLoggerMiddleware);
 // Use routes - mount at root level since router.js handles base paths
 app.use('/', routes);
 
+// Health check endpoint
+app.get('/healthz', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // 404 Not Found handler
 app.use(notFoundHandler);
 
@@ -62,20 +72,29 @@ const PORT = process.env.PORT || 4000;
  * Start the web server
  */
 async function startServer() {
+  console.log('Starting server initialization...');
   try {
     // Initialize Firebase first
-    
+    console.log('Initializing Firebase...');
     await initializeFirebase();
+    console.log('Firebase initialized successfully');
     
-    // Dynamically import express-request-id
-    const expressRequestId = await import('express-request-id');
-    const addRequestId = expressRequestId.default();
-    
-    // Add the request ID middleware
-    app.use(addRequestId);
+    try {
+      // Dynamically import express-request-id
+      const expressRequestId = await import('express-request-id');
+      const addRequestId = expressRequestId.default();
+      
+      // Add the request ID middleware
+      app.use(addRequestId);
+    } catch (importError) {
+      console.error('Failed to import express-request-id:', importError);
+      // Continue without request ID middleware
+    }
     
     // Start the web server
+    console.log(`Starting server on port ${PORT}...`);
     const server = app.listen(PORT, () => {
+      console.log(`SERVER RUNNING on port ${PORT}`);
       logger.info(`Server running on port ${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
     });
@@ -91,8 +110,9 @@ async function startServer() {
     
     return server;
   } catch (error) {
-    logger.error('Failed to start server:', { error: error.message });
-    process.exit(1);
+    console.error('FATAL: Failed to start server:', error);
+    // Don't exit immediately in production to allow logs to be captured
+    setTimeout(() => process.exit(1), 5000);
   }
 }
 
