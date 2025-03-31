@@ -24,6 +24,9 @@
         "start": "node index.js",
         "dev": "nodemon index.js"
     },
+    "engines": {
+        "node": ">=14.8.0"
+    },
     "keywords": [],
     "author": "",
     "license": "ISC",

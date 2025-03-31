@@ -63,7 +63,7 @@ client/.env.development
 server/config.js
 server/.env
 server/credentials/
-server/config/email.js
+server/config/email_secrets.js
 .env.local
 .env.development.local
 .env.test.local

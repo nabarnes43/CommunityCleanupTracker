@@ -185,15 +185,21 @@ async function startServer() {
       }
     }
     
-    // Use regular require instead of dynamic import
+    // Add request ID middleware using dynamic import as required by ES Module
     try {
-      const expressRequestId = require('express-request-id');
-      const addRequestId = expressRequestId();
-      // Add the request ID middleware
-      app.use(addRequestId);
-      console.log('Express request ID middleware added successfully');
+      // Use dynamic import for express-request-id since it's an ES Module
+      console.log('Attempting to load express-request-id using dynamic import...');
+      import('express-request-id').then(expressRequestIdModule => {
+        const addRequestId = expressRequestIdModule.default();
+        // Add the request ID middleware
+        app.use(addRequestId);
+        console.log('Express request ID middleware added successfully');
+      }).catch(importError => {
+        console.error('Failed to import express-request-id:', importError.message);
+        logger.warn('Server running without request ID middleware');
+      });
     } catch (importError) {
-      console.error('Failed to load express-request-id:', importError.message);
+      console.error('Failed with dynamic import of express-request-id:', importError.message);
       // Continue without request ID middleware
       logger.warn('Server running without request ID middleware');
     }
