@@ -85,6 +85,27 @@ app.use(notFoundHandler);
 // Error handling middleware
 app.use(serverErrorHandler);
 
+// Global error handlers to prevent container exit
+process.on('uncaughtException', (error) => {
+  console.error('UNCAUGHT EXCEPTION:', error);
+  logger.error('Uncaught exception', { 
+    error: error.message, 
+    stack: error.stack,
+    environment: process.env.NODE_ENV || 'unknown'
+  });
+  // Don't exit - keep container alive in Cloud Run
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('UNHANDLED REJECTION:', reason);
+  logger.error('Unhandled promise rejection', { 
+    reason: reason?.message || String(reason),
+    stack: reason?.stack,
+    environment: process.env.NODE_ENV || 'unknown'
+  });
+  // Don't exit - keep container alive in Cloud Run
+});
+
 /**
  * Server port, uses environment variable or fallbacks to 4000
  * @type {number}
@@ -127,9 +148,9 @@ async function startServer() {
         // In non-Cloud Run environments, we'll still log the error but might want to exit in development
         if (process.env.NODE_ENV !== 'production') {
           // Development environments might want to fail fast
-          console.error('Firebase is required in development mode. Exiting...');
-          // Removing process.exit(1) to prevent container from exiting with code 1
-          console.error('Error but continuing execution to prevent container exit');
+          console.error('Firebase is required in development mode, but will continue execution.');
+          logger.error('Firebase initialization failed in development mode');
+          // No process.exit to prevent container termination
         }
       }
     }
@@ -163,7 +184,12 @@ async function startServer() {
       logger.info('SIGTERM signal received. Shutting down gracefully.');
       server.close(() => {
         logger.info('HTTP server closed.');
-        process.exit(0);
+        // Allow logs to flush before exiting
+        setTimeout(() => {
+          console.log('Clean shutdown complete');
+          // Use exit with success code, which is safe for Cloud Run
+          process.exit(0);
+        }, 1000);
       });
     });
     
@@ -206,13 +232,21 @@ async function startServer() {
             console.log('Container still running. Check logs for errors.');
           }, 30000);
         } else {
-          // Wait 5 seconds before exiting to ensure logs are captured
-          setTimeout(() => process.exit(1), 5000);
+          // Log the error but don't exit
+          console.error('Critical server error, but continuing execution to prevent container exit');
+          logger.error('Critical server error in non-Cloud Run environment', { 
+            error: error.message, 
+            stack: error.stack 
+          });
         }
       }
     } else {
-      // In development, exit immediately
-      process.exit(1);
+      // In development, log error but don't exit
+      console.error('Development environment server error, continuing execution');
+      logger.error('Development environment error', { 
+        error: error.message, 
+        stack: error.stack 
+      });
     }
   }
 }
