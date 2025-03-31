@@ -11,6 +11,11 @@ const logger = require('../utils/logger');
 // Create the Secret Manager client
 const client = new SecretManagerServiceClient();
 
+// Map internal secret names to the actual secret names in Secret Manager
+const SECRET_NAME_MAP = {
+  'firebase-credentials': 'firebase-app-hosting-github-oauth-github-oauthtoken-d5eb75'
+};
+
 /**
  * Retrieves a secret from either local credentials or Google Cloud Secret Manager
  * @param {string} secretName - Name of the secret to retrieve
@@ -53,7 +58,11 @@ async function getSecret(secretName) {
       throw new Error('GOOGLE_CLOUD_PROJECT environment variable is not set');
     }
 
-    const name = `projects/${projectId}/secrets/${secretName}/versions/latest`;
+    // Map the internal secret name to the actual secret name in Secret Manager
+    const actualSecretName = SECRET_NAME_MAP[secretName] || secretName;
+    logger.debug(`Mapped secret name '${secretName}' to '${actualSecretName}'`);
+    
+    const name = `projects/${projectId}/secrets/${actualSecretName}/versions/latest`;
     logger.debug(`Fetching secret from Google Cloud: ${name}`);
     
     const [version] = await client.accessSecretVersion({
@@ -69,7 +78,14 @@ async function getSecret(secretName) {
       error: error.message, 
       secretName,
       environment: process.env.NODE_ENV,
-      stack: error.stack 
+      stack: error.stack,
+      projectId: process.env.GOOGLE_CLOUD_PROJECT,
+      fullSecretPath: process.env.NODE_ENV === 'production' ? 
+        `projects/${process.env.GOOGLE_CLOUD_PROJECT}/secrets/${secretName}/versions/latest` : 
+        path.join(__dirname, '..', 'credentials', `${secretName}.json`),
+      // Log additional details for debugging
+      errorCode: error.code,
+      errorDetails: error.details
     });
     throw error;
   }
