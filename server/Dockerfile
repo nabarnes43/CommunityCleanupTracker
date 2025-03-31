@@ -15,7 +15,7 @@ COPY . .
 
 # Set environment variables
 ENV PORT=8080
-ENV NODE_ENV=development
+ENV NODE_ENV=production
 
 # Your app binds to port 8080 so you'll use the EXPOSE instruction
 EXPOSE 8080

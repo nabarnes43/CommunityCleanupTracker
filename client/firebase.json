@@ -10,7 +10,7 @@
       {
         "source": "/api/**",
         "run": {
-          "serviceId": "community-cleanup-server",
+          "serviceId": "production-test",
           "region": "us-east1"
         }
       },
