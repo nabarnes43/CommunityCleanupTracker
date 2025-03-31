@@ -1,6 +1,21 @@
 # Community Cleanup Tracker
 
+#HOSTING
 A web application for tracking and managing community cleanup efforts. This project allows users to mark locations on a map, report issues like illegal dumping or standing water, and coordinate cleanup activities.
+Additional Testing Tips
+
+You can manually view all your Firebase Hosting deployments in the Firebase Console under Hosting > Deployment history.
+To test the build process locally before pushing:
+bashCopynpm run build
+firebase serve --only hosting
+This builds your project and serves it locally so you can verify it works before triggering the GitHub Actions.
+If you want to test the deployment process locally:
+bashCopynpm run build
+firebase deploy --only hosting
+
+
+This workflow gives you a complete testing pipeline - you can test changes in isolation via PRs before they go live, similar to how you might test deployments with Cloud Run.RetryClaude can make mistakes. Please double-check responses.
+
 
 ## Project Structure
 
