@@ -1,3 +1,4 @@
+https://leaflet-extras.github.io/leaflet-providers/preview/
 # Community Cleanup Tracker
 
 ## Hosting

@@ -1,4 +1,4 @@
-import React, { useState, CSSProperties, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import ImageCapture from '../ImageCapture';
 import './PinDataForm.css';
 
@@ -228,154 +228,47 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
     // Add modal to body
     document.body.appendChild(videoModal);
   };
-  
-  // Custom styles for modal compatibility
-  const containerStyle: CSSProperties = {
-    width: '100%',
-    margin: '0 auto',
-    overflow: 'hidden',
-    borderRadius: '8px',
-    backgroundColor: '#000'
-  };
-  
-  const thumbnailStyle: CSSProperties = {
-    width: '80px',
-    height: '80px',
-    objectFit: 'cover',
-    borderRadius: '4px',
-    border: '1px solid #ddd',
-    margin: '2px'
-  };
-  
-  const videoThumbnailStyle: CSSProperties = {
-    ...thumbnailStyle,
-    cursor: 'pointer',
-    position: 'relative'
-  };
-  
-  const videoPlayIconStyle: CSSProperties = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    color: 'white',
-    fontSize: '24px',
-    textShadow: '0 0 3px rgba(0,0,0,0.7)'
-  };
-  
-  const removeButtonStyle: CSSProperties = {
-    position: 'absolute',
-    top: '-8px',
-    right: '-8px',
-    width: '20px',
-    height: '20px',
-    borderRadius: '50%',
-    backgroundColor: 'rgba(255, 0, 0, 0.8)',
-    color: 'white',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: 'bold',
-    border: '1px solid white',
-    zIndex: 2
-  };
-  
-  const thumbnailContainerStyle: CSSProperties = {
-    position: 'relative',
-    display: 'inline-block'
-  };
-  
-  const previewContainerStyle: CSSProperties = {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '8px',
-    marginTop: '10px',
-    marginBottom: '15px',
-    maxWidth: '100%',
-    overflowX: 'auto'
-  };
-  
-  const instructionsStyle: CSSProperties = {
-    fontSize: '14px',
-    color: '#555',
-    marginBottom: '10px'
-  };
-  
-  // Add a wrapper style to ensure the component is properly sized
-  const wrapperStyle: CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    width: '100%',
-    maxWidth: '500px',
-    margin: '0 auto',
-    position: 'relative'
-  };
-  
-  // Style for the info container
-  const infoContainerStyle: CSSProperties = {
-    marginBottom: '10px',
-    padding: '8px',
-    backgroundColor: '#f5f5f5',
-    borderRadius: '8px',
-    fontSize: '14px'
-  };
-  
-  // Style for the upload limits display
-  const uploadLimitsStyle: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginBottom: '8px'
-  };
-  
-  // Style for the error message
-  const errorStyle: CSSProperties = {
-    color: '#ff3333',
-    fontWeight: 'bold',
-    textAlign: 'center'
-  };
 
   return (
-    <div style={wrapperStyle}>
-      <div style={infoContainerStyle}>
-        <div style={uploadLimitsStyle}>
+    <div className="media-wrapper">
+      <div className="media-info">
+        <div className="upload-limits">
           <div>Photos: {validImages.length}/5</div>
           <div>Videos: {validVideos.length}/2</div>
         </div>
-        {error && <div style={errorStyle}>{error}</div>}
+        {error && <div className="error-message">{error}</div>}
       </div>
       
-        <ImageCapture
-          allowVideo={true}
-          allowMultiple={true}
-          showPreview={false} // Disable internal preview to avoid confusion
-          enableDownload={false}
-          captureButtonText="Take Photo"
-          galleryButtonText="Select Photo"
-          onImageCapture={handleImageCapture}
-        />
+      <ImageCapture
+        allowVideo={true}
+        allowMultiple={true}
+        showPreview={false} // Disable internal preview to avoid confusion
+        enableDownload={false}
+        captureButtonText="Take Photo"
+        galleryButtonText="Select Photo"
+        onImageCapture={handleImageCapture}
+      />
       
       {/* Display thumbnails of current uploads */}
       {(validImages.length > 0 || validVideos.length > 0) && (
-        <div style={{marginTop: '20px', width: '100%'}}>
-          <h4 style={{width: '100%', marginBottom: '10px'}}>Captured Media:</h4>
+        <div className="mt-md w-100">
+          <h4 className="w-100 mb-sm">Captured Media:</h4>
           
           {validImages.length > 0 && (
             <div>
-              <p style={{fontSize: '14px', marginBottom: '5px'}}>Images ({validImages.length}/5):</p>
-              <div style={previewContainerStyle}>
+              <p className="text-sm mb-xs">Images ({validImages.length}/5):</p>
+              <div className="preview-container">
                 {validImages.map((image, index) => (
-                  <div key={`img-container-${index}-${image.name}`} style={thumbnailContainerStyle}>
+                  <div key={`img-container-${index}-${image.name}`} className="thumbnail-container">
                     <img 
                       key={`img-${index}-${image.name}`}
                       src={previewUrls[`img-${index}-${image.name}`] || ''}
                       alt={`Image ${index + 1}`}
-                      style={thumbnailStyle}
+                      className="thumbnail"
                     />
                     {onRemoveFile && (
                       <div 
-                        style={removeButtonStyle}
+                        className="remove-button"
                         onClick={() => onRemoveFile('images', index)}
                         title="Remove image"
                       >
@@ -390,27 +283,27 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
           
           {validVideos.length > 0 && (
             <div>
-              <p style={{fontSize: '14px', marginBottom: '5px'}}>Videos ({validVideos.length}/2):</p>
-              <div style={previewContainerStyle}>
+              <p className="text-sm mb-xs">Videos ({validVideos.length}/2):</p>
+              <div className="preview-container">
                 {validVideos.map((video, index) => (
                   <div 
                     key={`vid-container-${index}-${video.name}`}
-                    style={thumbnailContainerStyle}
+                    className="thumbnail-container"
                   >
                     <div 
-                      style={videoThumbnailStyle}
+                      className="video-thumbnail"
                       onClick={() => handleVideoPreviewClick(previewUrls[`vid-${index}-${video.name}`] || '')}
                     >
                       <video 
                         src={previewUrls[`vid-${index}-${video.name}`] || ''}
-                        style={thumbnailStyle}
+                        className="thumbnail"
                         preload="metadata"
                       />
-                      <div style={videoPlayIconStyle}>▶</div>
+                      <div className="video-play-icon">▶</div>
                     </div>
                     {onRemoveFile && (
                       <div 
-                        style={removeButtonStyle}
+                        className="remove-button"
                         onClick={() => onRemoveFile('videos', index)}
                         title="Remove video"
                       >

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './PinDataForm.css';
 import { PinDataFormProps, FormType } from '../../types';
 import DumpingForm from './DumpingForm';
@@ -52,6 +52,23 @@ const PinDataForm: React.FC<PinDataFormProps> = ({ onSubmit, onCancel }) => {
     images: [],
     videos: []
   });
+
+  /**
+   * Set the current date when component mounts
+   */
+  useEffect(() => {
+    // Format the date as YYYY-MM-DD for the date input
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+    const day = String(today.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+    
+    setFormData(prevData => ({
+      ...prevData,
+      date: formattedDate
+    }));
+  }, []);
 
   /**
    * Handle changes for text and select inputs
@@ -343,46 +360,52 @@ const PinDataForm: React.FC<PinDataFormProps> = ({ onSubmit, onCancel }) => {
       <h3>Enter Pin Details</h3>
 
       {/* Form Type Selection */}
-      <label>Select Form Type:</label>
-      <select 
-        name="formType" 
-        value={formData.formType} 
-        onChange={handleFormTypeChange} 
-        required
-      >
-        <option value="">Choose Type</option>
-        <option value={FormType.DUMPING}>Illegal Dumping</option>
-        <option value={FormType.STANDING_WATER}>Standing Water Infrastructure</option>
-        <option value={FormType.STORMWATER}>Stormwater Infrastructure Problem</option>
-      </select>
+      <div className="text-input-container">
+        <div className="input-header">
+          <label>Select Form Type:</label>
+        </div>
+        <select 
+          className="selector"
+          name="formType" 
+          value={formData.formType} 
+          onChange={handleFormTypeChange} 
+          required
+        >
+          <option value="">Choose Type</option>
+          <option value={FormType.DUMPING}>Illegal Dumping</option>
+          <option value={FormType.STANDING_WATER}>Standing Water Infrastructure</option>
+          <option value={FormType.STORMWATER}>Stormwater Infrastructure Problem</option>
+        </select>
+      
+        {/* Render the appropriate form based on the selected form type */}
+        {formData.formType === FormType.DUMPING && (
+          <DumpingForm
+            typeOfDumping={formData.typeOfDumping}
+            locationOfDumping={formData.locationOfDumping}
+            amountOfDumping={formData.amountOfDumping}
+            onInputChange={handleInputChange}
+          />
+        )}
 
-      {/* Render the appropriate form based on the selected form type */}
-      {formData.formType === FormType.DUMPING && (
-        <DumpingForm
-          typeOfDumping={formData.typeOfDumping}
-          locationOfDumping={formData.locationOfDumping}
-          amountOfDumping={formData.amountOfDumping}
-          onInputChange={handleInputChange}
-        />
-      )}
+        {formData.formType === FormType.STANDING_WATER && (
+          <StandingWaterForm
+            weatherCondition={formData.weatherCondition}
+            standingWaterLocation={formData.standingWaterLocation}
+            presenceOfMold={formData.presenceOfMold}
+            onInputChange={handleInputChange}
+          />
+        )}
 
-      {formData.formType === FormType.STANDING_WATER && (
-        <StandingWaterForm
-          weatherCondition={formData.weatherCondition}
-          standingWaterLocation={formData.standingWaterLocation}
-          presenceOfMold={formData.presenceOfMold}
-          onInputChange={handleInputChange}
-        />
-      )}
+        {formData.formType === FormType.STORMWATER && (
+          <StormwaterForm
+            stormwaterProblemLocation={formData.stormwaterProblemLocation}
+            stormwaterProblemType={formData.stormwaterProblemType}
+            causeOfClog={formData.causeOfClog}
+            onInputChange={handleInputChange}
+          />
+        )}
+      </div>
 
-      {formData.formType === FormType.STORMWATER && (
-        <StormwaterForm
-          stormwaterProblemLocation={formData.stormwaterProblemLocation}
-          stormwaterProblemType={formData.stormwaterProblemType}
-          causeOfClog={formData.causeOfClog}
-          onInputChange={handleInputChange}
-        />
-      )}
 
       {/* Replace FileUploadSection with CameraCapture */}
       <CameraCapture
@@ -393,35 +416,58 @@ const PinDataForm: React.FC<PinDataFormProps> = ({ onSubmit, onCancel }) => {
       />
 
       {/* Common Fields */}
-      <label>Any Notes or Observations:</label>
-      <textarea
-        name="notes"
-        placeholder="Enter some notes"
-        maxLength={150}
-        value={formData.notes}
-        onChange={handleInputChange}
-      />
+      <div className="text-input-container">
+        <div className="input-header">
+          <label>Any Notes or Observations:</label>
+        </div>
+        <div className="input-field">
+          <textarea
+            className="input-field-text" // Ensure this class is applied
+            name="notes"
+            placeholder="Enter some notes"
+            maxLength={150}
+            value={formData.notes}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+      </div>
+      
+      <div className="text-input-container">
+        <div className="input-header">
+          <label>How Does This Observation Make You Feel?:</label>
+        </div>
+        <div className="input-field">
+          <textarea
+            className="input-field-text"
+            name="moodNotes"
+            placeholder="Enter a mood"
+            maxLength={150}
+            value={formData.moodNotes}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+      </div>
 
-      <label>How Does This Observation Make You Feel?:</label>
-      <textarea
-        name="moodNotes"
-        placeholder="Enter a mood"
-        maxLength={150}
-        value={formData.moodNotes}
-        onChange={handleInputChange}
-      />
+      <div className="text-input-container">
+        <div className="input-header">
+          <label>Date Observed:</label>
+        </div>
+        <div className="input-field">
+          <input
+            className="input-field-text"
+            type="date"
+            name="date"
+            value={formData.date}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+      </div>
 
-      <label>Date Observed:</label>
-      <input
-        type="date"
-        name="date"
-        value={formData.date}
-        onChange={handleInputChange}
-        required
-      />
-
-      <button type="submit">Add Pin</button>
-      <button type="button" onClick={onCancel}>Cancel</button>
+      <button className="form-button" type="submit">Add Pin</button>
+      <button className="form-button" type="button" onClick={onCancel}>Cancel</button>
     </form>
   );
 };

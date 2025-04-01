@@ -28,57 +28,73 @@ const StormwaterForm: React.FC<StormwaterFormProps> = ({
 }) => {
   return (
     <>
-      <h4>Stormwater Infrastructure Problem</h4>
-      <label>Location of Problem:</label>
-      <select
-        name="stormwaterProblemLocation"
-        value={stormwaterProblemLocation}
-        onChange={onInputChange}
-        required
-      >
-        <option value="">Select Location</option>
-        <option value="Vacant lot">Vacant lot</option>
-        <option value="Public street">Public street</option>
-        <option value="Public sidewalk">Public sidewalk</option>
-        <option value="Public park">Public park</option>
-        <option value="Occupied single family home">Occupied single family home</option>
-        <option value="Unoccupied single family home">Unoccupied single family home</option>
-        <option value="Occupied apartment complex">Occupied apartment complex or other complex</option>
-        <option value="Unoccupied apartment complex">Unoccupied apartment complex or other complex</option>
-        <option value="Occupied commercial building">Occupied business or commercial building</option>
-        <option value="Unoccupied commercial building">Unoccupied business or commercial building</option>
-        <option value="Other">Other</option>
-      </select>
+      <div className="dumping-form-container">
+        <div className="selector-input-container">
+          <div className="selector-input-header">
+            <label>Location of Problem:</label>
+          </div>
+          <select
+            name="stormwaterProblemLocation"
+            value={stormwaterProblemLocation}
+            onChange={onInputChange}
+            required
+            className="small-selector"
+          >
+            <option value="">Select Location</option>
+            <option value="Vacant lot">Vacant lot</option>
+            <option value="Public street">Public street</option>
+            <option value="Public sidewalk">Public sidewalk</option>
+            <option value="Public park">Public park</option>
+            <option value="Occupied single family home">Occupied single family home</option>
+            <option value="Unoccupied single family home">Unoccupied single family home</option>
+            <option value="Occupied apartment complex">Occupied apartment complex or other complex</option>
+            <option value="Unoccupied apartment complex">Unoccupied apartment complex or other complex</option>
+            <option value="Occupied commercial building">Occupied business or commercial building</option>
+            <option value="Unoccupied commercial building">Unoccupied business or commercial building</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
 
-      <label>Type of Problem:</label>
-      <select
-        name="stormwaterProblemType"
-        value={stormwaterProblemType}
-        onChange={onInputChange}
-        required
-      >
-        <option value="">Select Type</option>
-        <option value="Clogged storm drain">Clogged storm drain</option>
-        <option value="Clogged stormwater pipe">Clogged stormwater pipe</option>
-        <option value="Collapsed stormwater drain">Collapsed stormwater drain</option>
-        <option value="Sinkhole or depression">Sinkhole or depression</option>
-        <option value="Other">Other</option>
-      </select>
+        <div className="selector-input-container">
+          <div className="selector-input-header">
+            <label>Type of Problem:</label>
+          </div>
+          <select
+            name="stormwaterProblemType"
+            value={stormwaterProblemType}
+            onChange={onInputChange}
+            required
+            className="small-selector"
+          >
+            <option value="">Select Type</option>
+            <option value="Clogged storm drain">Clogged storm drain</option>
+            <option value="Clogged stormwater pipe">Clogged stormwater pipe</option>
+            <option value="Collapsed stormwater drain">Collapsed stormwater drain</option>
+            <option value="Sinkhole or depression">Sinkhole or depression</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
 
-      <label>Cause of Clog:</label>
-      <select
-        name="causeOfClog"
-        value={causeOfClog}
-        onChange={onInputChange}
-        required
-      >
-        <option value="">Select Cause</option>
-        <option value="Dirt or leaves">Dirt or leaves</option>
-        <option value="Trash">Trash</option>
-        <option value="Combination of dirt, leaves, or trash">Combination of dirt, leaves, or trash</option>
-        <option value="Tree roots">Tree roots</option>
-        <option value="Other">Other</option>
-      </select>
+        <div className="selector-input-container">
+          <div className="selector-input-header">
+            <label>Cause of Clog:</label>
+          </div>
+          <select
+            name="causeOfClog"
+            value={causeOfClog}
+            onChange={onInputChange}
+            required
+            className="small-selector"
+          >
+            <option value="">Select Cause</option>
+            <option value="Dirt or leaves">Dirt or leaves</option>
+            <option value="Trash">Trash</option>
+            <option value="Combination of dirt, leaves, or trash">Combination of dirt, leaves, or trash</option>
+            <option value="Tree roots">Tree roots</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
     </>
   );
 };
