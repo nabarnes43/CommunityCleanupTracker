@@ -1,7 +1,8 @@
 import L from 'leaflet';
 
 /**
- * Custom icon for existing markers on the map
+ * Custom icon for map markers
+ * Uses the standard Leaflet div icon with custom styling
  */
 export const customIcon = new L.Icon({
   iconUrl: require('../../img/marker.png'),

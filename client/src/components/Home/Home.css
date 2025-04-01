@@ -1,18 +1,17 @@
-/* Home.css */
+/* Home.css - Optimized version using utility classes */
+
+/* Only keep styles that can't be replaced with utility classes */
 
 .container {
-    display: flex;
-    flex-direction: column;
-    width: 100vw;
-    height: 100vh;
+    /* These can't be fully replaced with utils */
     position: relative;
     overflow: hidden;
+    width: 100vw;
+    height: 100vh;
 }
 
 .map-container {
-    flex: 1;
-    width: 100%;
-    height: 100%;
+    /* Required for map positioning */
     z-index: 1;
 }
 
@@ -22,20 +21,17 @@
     width: 100% !important;
 }
 
-/* Buttons container to hold action buttons */
+/* Buttons container - position is custom */
 .buttons-container {
     position: absolute;
     top: 20px;
     right: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    z-index: 900; /* Below modals but above map */
-    pointer-events: none; /* Allow clicks to pass through to map */
+    z-index: 900;
+    pointer-events: none;
 }
 
-/* Base styling for both action buttons */
-.buttons-container .action-button {
+/* Base styling for action buttons - too specific for utils */
+.action-button {
     width: 60px !important;
     height: 60px !important;
     border-radius: 50% !important;
@@ -43,12 +39,9 @@
     color: black !important;
     border: 3px solid black !important;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
     cursor: pointer !important;
     transition: transform 0.2s, box-shadow 0.2s !important;
-    pointer-events: auto !important; /* Make buttons clickable */
+    pointer-events: auto !important;
     font-weight: bold !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -56,72 +49,52 @@
     z-index: 950 !important;
 }
 
-.buttons-container .action-button:hover {
+.action-button:hover {
     transform: scale(1.05) !important;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4) !important;
 }
 
-.buttons-container .action-button:active {
+.action-button:active {
     transform: scale(0.95) !important;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
 }
 
-/* Pin button specific styling */
-.buttons-container .action-button.pin-button {
+/* Button specific styling - only keep what can't be done with utils */
+.pin-button {
     font-size: 32px !important;
     line-height: 1 !important;
 }
 
-/* Report button specific styling */
-.buttons-container .action-button.report-button {
+.report-button {
     font-size: 28px !important;
     line-height: 1 !important;
     font-weight: bolder !important;
 }
 
-/* Mobile adjustments for buttons */
+/* Mobile adjustments - only custom parts */
 @media (max-width: 767px) {
     .buttons-container {
         top: 15px !important;
         right: 15px !important;
-        gap: 10px !important;
     }
     
-    .buttons-container .action-button {
+    .action-button {
         width: 50px !important;
         height: 50px !important;
     }
     
-    .buttons-container .action-button.pin-button {
+    .pin-button {
         font-size: 26px !important;
     }
     
-    .buttons-container .action-button.report-button {
+    .report-button {
         font-size: 22px !important;
     }
 }
 
+/* Map popup styles - specific to map component */
 .map-popup {
-  font-size: 16px;
-  color: black;
   max-width: 300px;
-}
-
-.map-popup h3 {
-  margin: 0 0 10px 0;
-  color: #333;
-}
-
-.map-popup p {
-  margin: 5px 0;
-}
-
-.popup-images {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 8px;
-  justify-content: center;
 }
 
 .popup-images img {
@@ -134,56 +107,31 @@
   transform: scale(1.05);
 }
 
-.popup-videos {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 8px;
-}
-
 .popup-videos video {
   max-width: 100%;
   border-radius: 4px;
   background: #000;
 }
 
-/* Ensure popup is wide enough for videos */
 .leaflet-popup-content {
   overflow-y: auto;
   min-width: 220px;
   max-width: 300px;
 }
 
-.popup-images, .popup-videos {
-  margin-top: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-}
-
-.video-container {
-  width: 100%;
-  margin-top: 8px;
-}
-
-/* Custom cluster icon styling */
+/* Custom cluster icon styling - specific to map */
 .marker-cluster-custom {
-  background-color: #000; /* Black background */
-  border-radius: 8px; /* Rounded corners */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white; /* White text for the number */
-  font-size: 14px; /* Font size for the number */
-  font-weight: bold; /* Make the number bold */
-  width: 40px; /* Width of the cluster */
-  height: 40px; /* Height of the cluster */
-  border: 2px solid #000000; /* Optional: White border for better visibility */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Optional: Shadow for depth */
+  background-color: #000;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  width: 40px;
+  height: 40px;
+  border: 2px solid #000000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-/* Adjust the cluster size based on the number of markers */
 .marker-cluster-custom.large {
   width: 60px;
   height: 60px;
@@ -198,55 +146,19 @@
   width: 40px;
   height: 40px;
 }
-  
 
-/* Center the form as a modal */
+/* Pin form - only custom positioning */
 .pin-form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  position: fixed; /* Makes the form fixed on the screen */
+  position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* Center the form */
-  background: white;
-  padding: 20px;
-  border-radius: 8px; /* Rounded corners */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow for a floating effect */
-  z-index: 1000; /* Ensure the form is above the map */
-  width: 300px; /* Fixed width for better layout */
-  max-width: 90%; /* Ensure the form is responsive on small screens */
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  width: 300px;
+  max-width: 90%;
 }
 
-/* Style for the input fields */
-.pin-form input,
-.pin-form textarea {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 14px;
-  box-sizing: border-box; /* Ensure padding doesn't affect width */
-}
-
-/* Button styling inside the form */
-.pin-form button {
-  background-color: #000000;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s ease; /* Smooth transition on hover */
-}
-
-/* Button hover effect */
-.pin-form button:hover {
-  background-color: #474847;
-}
-
-/* Enhanced popup styling for both mobile and desktop */
+/* Enhanced popup styling - only custom parts */
 .custom-popup .leaflet-popup-content-wrapper {
   border-radius: 8px;
   box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
@@ -256,12 +168,8 @@
   font-size: 20px;
   width: 30px;
   height: 30px;
-  padding: 0;
   top: 10px;
   right: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   border-radius: 50%;
   background-color: white;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
@@ -272,7 +180,7 @@
   color: #000;
 }
 
-/* Mobile-specific popup styles */
+/* Mobile popup styles - only custom parts */
 @media (max-width: 767px) {
   .custom-popup .leaflet-popup-content-wrapper {
     max-width: 90vw;
@@ -287,37 +195,15 @@
   }
 }
 
-/* Ensure consistent modal behavior between components */
+/* Modal styles - only position and z-index */
 .modal {
     position: fixed;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 2000; /* Ensure it appears above all elements */
+    z-index: 2000;
     top: 0;
     left: 0;
 }
 
-/* Modal content styling - desktop */
-.modal-content {
-    position: relative;
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    max-width: 90%;
-    max-height: 90%;
-    overflow-y: auto;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
 @media (max-width: 767px) {
-    .modal {
-        align-items: flex-start;
-    }
-    
     .modal-content {
         width: 100% !important;
         height: 100% !important;
@@ -334,32 +220,18 @@
     }
 }
 
-/* Cancel Button (X) */
+/* Cancel Button - positioning */
 .modal-cancel-btn {
   position: fixed;
   top: 20px;
   right: 20px;
-  background: #ffffff;
-  border: none;
-  font-size: 32px;
-  font-weight: bold;
-  cursor: pointer;
-  color: #333;
   z-index: 2001;
   width: 64px;
   height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   border-radius: 50%;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.modal-cancel-btn:hover {
-  background-color: #e0e0e0;
-}
-
-/* Adjust for mobile */
 @media (max-width: 767px) {
   .modal-cancel-btn {
       top: 8px;
@@ -368,4 +240,14 @@
       height: 32px;
       font-size: 16px;
   }
+}
+
+/* Highlighted popup for newly added markers */
+.highlight-popup .leaflet-popup-content-wrapper {
+  background-color: #f0f8ff; /* Light blue background */
+  border: 2px solid #007BFF;
+}
+
+.highlight-popup .leaflet-popup-tip {
+  background-color: #007BFF;
 }
