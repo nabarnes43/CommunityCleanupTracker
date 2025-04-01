@@ -1,23 +1,46 @@
 # Community Cleanup Tracker
 
-#HOSTING
+## Hosting
+
 A web application for tracking and managing community cleanup efforts. This project allows users to mark locations on a map, report issues like illegal dumping or standing water, and coordinate cleanup activities.
-Additional Testing Tips
+
+### Deployment
 
 You can manually view all your Firebase Hosting deployments in the Firebase Console under Hosting > Deployment history.
+
+#### Local Testing
+
 To test the build process locally before pushing:
-bashCopy
+```bash
 npm run build
 npx firebase serve --only hosting
+```
 This builds your project and serves it locally so you can verify it works before triggering the GitHub Actions.
-If you want to test the deployment process locally:
-bashCopy
+
+#### Production Deployment
+
+If you want to deploy to production:
+```bash
 npm run build
 npx firebase deploy --only hosting
+```
 
+This workflow gives you a complete testing pipeline - you can test changes in isolation via PRs before they go live, similar to how you might test deployments with Cloud Run.
 
-This workflow gives you a complete testing pipeline - you can test changes in isolation via PRs before they go live, similar to how you might test deployments with Cloud Run.RetryClaude can make mistakes. Please double-check responses.
+## CI/CD Pipeline
 
+This project uses GitHub Actions for continuous integration and deployment:
+
+- **Automated Testing**: All PRs are automatically tested
+- **Preview Deployments**: Feature branches get preview deployments
+- **Production Deployment**: Main branch changes are automatically deployed to production
+
+### GitHub Actions Workflow
+
+The workflow is configured in `.github/workflows/` and handles:
+- Building and testing the application
+- Deploying to Firebase Hosting
+- Notifying team members of deployment status
 
 ## Project Structure
 
@@ -37,9 +60,10 @@ This workflow gives you a complete testing pipeline - you can test changes in is
 
 ### Prerequisites
 
-- Node.js (v14+)
-- npm or yarn
-- Firebase account
+- Node.js (v16+ recommended)
+- npm (v8+) or yarn (v1.22+)
+- Firebase account and Firebase CLI (v11+)
+- Google Maps API key for map functionality
 
 ### Installation
 
