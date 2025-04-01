@@ -14,10 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
       - name: Install client dependencies
         working-directory: ./client
-        run: npm ci
+        run: npm ci --legacy-peer-deps
       - name: Build client
         working-directory: ./client
         run: npm run build
