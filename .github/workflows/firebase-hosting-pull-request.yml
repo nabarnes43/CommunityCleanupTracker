@@ -26,3 +26,4 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GMAIL_API_TEST_427120 }}
           projectId: gmail-api-test-427120
+          entryPoint: ./client
