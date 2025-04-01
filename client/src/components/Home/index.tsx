@@ -392,8 +392,10 @@ const Home: React.FC = () => {
         className="map-container"
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/#map=5/38.007/-95.844/">OpenStreetMap</a>'
-          url='https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+          attribution='<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url='https://tile.jawg.io/jawg-sunny/{z}/{x}/{y}{r}.png?access-token={accessToken}'
+          accessToken='6RRKSJTP0uRGlGeLLoKokFxIxaeyoPR8Vd2n8Y3qRmVlTkcLWzaxXVDqPTBVMlf5'
+          // Add tese props to fix tile loading issues
         />
 
         <MarkerClusterComponent markers={markers} />
