@@ -1,5 +1,6 @@
-/* Styling for the About component */
+Styling for the About component
 
+/* Main container for the About component */
 .about-container {
   max-width: 800px;
   margin: 0 auto;
@@ -7,10 +8,17 @@
   font-family: Arial, sans-serif;
   line-height: 1.6;
   text-align: center;
-  max-height: 85vh; /* Limit height to 85% of viewport height */
-  overflow-y: auto; /* Enable vertical scrolling */
-  scrollbar-width: thin; /* For Firefox */
-  scrollbar-color: #3498db #f8f9fa; /* For Firefox */
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: scroll;
+  background-color: white;
+  z-index: 10;
+  padding-bottom: 80px; /* Give space for the bottom navbar */
 }
 
 /* Custom scrollbar for webkit browsers (Chrome, Safari, etc.) */
@@ -33,9 +41,10 @@
   background-color: #2980b9;
 }
 
+/* TODO Remove this styling from about */
 h1, h2, h3 {
   text-align: center;
-  color: #2c3e50;
+  color: #000000;
   margin-top: 1.5em;
 }
 
@@ -128,6 +137,7 @@ strong {
 @media (max-width: 768px) {
   .about-container {
     padding: 15px;
+    padding-bottom: 80px; /* Space for mobile navbar */
   }
   
   .instructions-container {
