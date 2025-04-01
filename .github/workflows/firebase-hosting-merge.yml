@@ -11,10 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npm ci && npm run build
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+      - name: Install client dependencies
+        working-directory: ./client
+        run: npm ci --legacy-peer-deps
+      - name: Build client
+        working-directory: ./client
+        run: CI=false npm run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GMAIL_API_TEST_427120 }}
           channelId: live
           projectId: gmail-api-test-427120
+          entryPoint: ./client
