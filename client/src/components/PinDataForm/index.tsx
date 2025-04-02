@@ -5,6 +5,8 @@ import DumpingForm from './DumpingForm';
 import StandingWaterForm from './StandingWaterForm';
 import StormwaterForm from './StormwaterForm';
 import CameraCapture from './CameraCapture';
+// @ts-ignore
+import CalendarIcon from '../../img/Calendar.svg';
 
 /**
  * Interface for the form data state
@@ -454,15 +456,16 @@ const PinDataForm: React.FC<PinDataFormProps> = ({ onSubmit, onCancel }) => {
         <div className="input-header">
           <label>Date Observed:</label>
         </div>
-        <div className="input-field">
+        <div className="date-input-container">
           <input
-            className="input-field-text"
+            className="date-input"
             type="date"
             name="date"
             value={formData.date}
             onChange={handleInputChange}
             required
           />
+          <img src={CalendarIcon} alt="Calendar" className="date-icon" />
         </div>
       </div>
 

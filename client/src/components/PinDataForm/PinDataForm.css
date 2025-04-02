@@ -21,6 +21,7 @@
 
   @media (max-width: 767px) {
     .pin-form {
+        appearance: none;
         border-radius: 0;
     }
   }
@@ -49,6 +50,7 @@
     padding: 4px;
     border-radius: 12px;
     border: 1px solid black;
+    box-sizing: border-box;
  }
 
  .selector-input-container {
@@ -58,6 +60,7 @@
     justify-content: center;
     width: 100%;
     gap: 10px;
+    box-sizing: border-box;
  }
 
  .selector-input-header {
@@ -65,26 +68,48 @@
     font-size: 16px;
     font-weight: bold;
     text-align: left;
+    box-sizing: border-box;
+ }
+
+/* Required field indicator - add asterisk to all form labels since all fields are required */
+.selector-input-header label::after,
+.input-header label::after {
+    content: " *";
+    color: #e32;
+    font-size: 10px;
+    position: relative;
+    top: -10px;
+}
+
+.selector, .small-selector {
+    width: 100%;
+    border-radius: 12px;
+    box-sizing: border-box; 
+    font-family: 'Inria Serif', serif;
+    white-space: normal; /* Allows text to wrap */
+    border: 1px solid black;
+    background-color: #EAE0D5;
+    color: black;
+    box-sizing: border-box;
+     /* Remove default select styling */
+     -webkit-appearance: none;
+     -moz-appearance: none;
+     appearance: none;
+     
+     background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+     background-repeat: no-repeat;
+     background-position: calc(100% - 8px) center; /* Position 12px from right edge */
  }
 
 .selector {
-    width: 100%;
-    border-radius: 12px;
-    box-sizing: border-box; 
     font-size: 24px;
-    font-family: 'Inria Serif', serif;
-    border: 1px solid black;
-    background-color: #EAE0D5;
+    padding: 8px 30px 8px 8px;
+
  }
 
 .small-selector {
-    width: 100%;
-    border-radius: 12px;
-    box-sizing: border-box; 
-    font-size: 12px;
-    font-family: 'Inria Serif', serif;
-    border: 1px solid black;
-    background-color: #EAE0D5;
+    font-size: 16px;
+    padding: 4px 30px 4px 4px;
  }
 
  /* Common Fields */
@@ -107,11 +132,59 @@
 }
 
 .input-field-text {
+    padding: 8px;
     width: 100%;
+    font-family: 'Inria Serif', serif;
+    font-size: 12px;
+    color: black;
     border: 1px solid black;
     background-color: #EAE0D5;
     border-radius: 12px !important;
     box-sizing: border-box; /* Include padding in the element's total width and height */
+}
+
+.date-input-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    position: relative;
+}
+
+.date-input {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 12px;
+    box-sizing: border-box;
+    font-size: 16px;
+    background-color: #EAE0D5;
+    border: 1px solid black;
+    font-family: 'Inria Serif', serif;
+    padding: 4px;
+    color: black;
+}
+
+/* Hide default calendar picker icon but extend its clickable area */
+.date-input::-webkit-calendar-picker-indicator {
+    opacity: 0; /* Hide the default calendar icon */
+    width: 100%; /* Make it full width */
+    height: 100%; /* Make it full height */
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+}
+
+.date-icon {
+    position: absolute;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    pointer-events: none; /* Ensures clicks pass through to the input */
 }
 
 .form-button {
@@ -126,6 +199,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     font-family: 'Inria Serif', serif;
+    font-weight: bold;
 }   
 
 .form-button:hover {
