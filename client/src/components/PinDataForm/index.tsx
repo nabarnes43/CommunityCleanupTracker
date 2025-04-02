@@ -362,7 +362,7 @@ const PinDataForm: React.FC<PinDataFormProps> = ({ onSubmit, onCancel }) => {
       {/* Form Type Selection */}
       <div className="text-input-container">
         <div className="input-header">
-          <label>Select Form Type:</label>
+          <label>Select Issue Type:</label>
         </div>
         <select 
           className="selector"

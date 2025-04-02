@@ -14,8 +14,15 @@
     padding: 12px;
     padding-bottom: 48px;
     background-color: #EAE0D5;
-    border-radius: 8px;
+    border-radius: 24px;
     overflow: auto;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 767px) {
+    .pin-form {
+        border-radius: 0;
+    }
   }
   
  .pin-form h3 {

@@ -2,8 +2,7 @@ import React from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './Home.css';
-// Import utility styles
-import '../../styles/utils.css';
+
 
 // Import custom hooks
 import useGeolocation from './hooks/useGeolocation';
@@ -84,7 +83,7 @@ const Home: React.FC = () => {
       <MapContainer 
         center={mapCenter} 
         zoom={mapZoom} 
-        className="map-container w-100 h-100"
+        className="map-container"
       >
         {/* Base map layer */}
         <TileLayer

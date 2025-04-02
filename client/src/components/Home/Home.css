@@ -21,71 +21,98 @@
     width: 100% !important;
 }
 
-/* Buttons container - position is custom */
-.buttons-container {
+/*Pin Button Container*/
+.pin-button {
     position: absolute;
     top: 20px;
     right: 20px;
     z-index: 900;
-    pointer-events: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
 }
 
-/* Base styling for action buttons - too specific for utils */
-.action-button {
-    width: 60px !important;
-    height: 60px !important;
-    border-radius: 50% !important;
-    background-color: white !important;
-    color: black !important;
-    border: 3px solid black !important;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3) !important;
-    cursor: pointer !important;
-    transition: transform 0.2s, box-shadow 0.2s !important;
-    pointer-events: auto !important;
-    font-weight: bold !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: visible !important;
-    z-index: 950 !important;
+.pin-icon {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    overflow: hidden;
+    background-color: transparent;
+    border: none;
 }
 
-.action-button:hover {
-    transform: scale(1.05) !important;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4) !important;
+.pin-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
 
-.action-button:active {
-    transform: scale(0.95) !important;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+.pin-button:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-/* Button specific styling - only keep what can't be done with utils */
-.pin-button {
-    font-size: 32px !important;
-    line-height: 1 !important;
+/* Modal styles - only position and z-index */
+.modal {
+  position: fixed;
+  z-index: 2000;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
+/* Modal content styling */
+.modal-content {
+  border: 1px solid rgb(255, 0, 0);
+  width: 80%;
+  height: 70%;
+}
 
-/* Mobile adjustments - only custom parts */
+/* Cancel Button - positioning */
+.modal-cancel-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 2001;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 32px;
+  color: #333;
+}
+
 @media (max-width: 767px) {
-    .buttons-container {
-        top: 15px !important;
-        right: 15px !important;
-    }
-    
-    .action-button {
-        width: 50px !important;
-        height: 50px !important;
-    }
-    
-    .pin-button {
-        font-size: 26px !important;
-    }
-    
-    .report-button {
-        font-size: 22px !important;
-    }
+  .modal-content {
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+  }
+
+  .modal-cancel-btn {
+      top: 8px;
+      right: 8px;
+      width: 32px;
+      height: 32px;
+      font-size: 16px;
+  }
 }
+
 
 /* Map popup styles - specific to map component */
 .map-popup {
@@ -156,17 +183,6 @@
   height: 40px;
 }
 
-/* Pin form - only custom positioning */
-.pin-form {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1000;
-  width: 300px;
-  max-width: 90%;
-}
-
 /* Enhanced popup styling - only custom parts */
 .custom-popup .leaflet-popup-content-wrapper {
   border-radius: 8px;
@@ -202,59 +218,6 @@
     font-size: 24px;
     width: 40px;
     height: 40px;
-  }
-}
-
-/* Modal styles - only position and z-index */
-.modal {
-    position: fixed;
-    z-index: 2000;
-    top: 0;
-    left: 0;
-}
-
-/* Center text in modal content */
-.modal-content {
-    text-align: center;
-}
-
-@media (max-width: 767px) {
-    .modal-content {
-        width: 100% !important;
-        height: 100% !important;
-        max-width: 100% !important;
-        max-height: 100% !important;
-        border-radius: 0 !important;
-        padding: 60px 20px 20px 20px !important;
-        box-sizing: border-box !important;
-        position: absolute !important;
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        text-align: center !important;
-    }
-}
-
-/* Cancel Button - positioning */
-.modal-cancel-btn {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 2001;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-@media (max-width: 767px) {
-  .modal-cancel-btn {
-      top: 8px;
-      right: 8px;
-      width: 32px;
-      height: 32px;
-      font-size: 16px;
   }
 }
 

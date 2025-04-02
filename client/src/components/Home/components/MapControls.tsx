@@ -1,4 +1,5 @@
 import React from 'react';
+import { customIcon } from '../mapIcons';
 
 /**
  * Props for the MapControls component
@@ -19,16 +20,21 @@ const MapControls: React.FC<MapControlsProps> = ({
   disabled
 }) => {
   return (
-    <div className="buttons-container flex flex-column gap-md">
-      <button 
-        onClick={onReportIssue}
-        disabled={disabled}
-        className="action-button report-button flex items-center justify-center"
-        aria-label="Report an issue"
-      >
-        +
-      </button>
-    </div>
+    <button 
+      onClick={onReportIssue}
+      disabled={disabled}
+      className="pin-button"
+      aria-label="Drop a Pin Report an issue"
+    >
+      <div 
+        className="pin-icon"
+        style={{ 
+          backgroundImage: `url(${customIcon.options.iconUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      ></div>
+    </button>
   );
 };
 
