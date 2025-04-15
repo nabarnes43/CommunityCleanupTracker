@@ -1,0 +1,26 @@
+.simple-file-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-select-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000000;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.file-select-button:hover {
+  background-color: #e0e0e0;
+}
+
+.file-select-button svg {
+  margin-right: 8px;
+} 
