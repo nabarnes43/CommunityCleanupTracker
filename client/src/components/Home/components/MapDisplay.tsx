@@ -2,7 +2,7 @@ import React from 'react';
 import { Marker, Popup } from 'react-leaflet';
 import { LatLngTuple } from 'leaflet';
 import { Marker as MarkerType } from '../../../types';
-import { newMarkerIcon, customIcon } from '../mapIcons';
+import { newMarkerIcon, userLocationIcon } from '../mapIcons';
 import MapUpdater from '../MapUpdater';
 import MarkerClusterComponent from '../MarkerClusterComponent';
 
@@ -42,7 +42,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
       
       {/* Show the user location marker */}
       {userLocation && showUserMarker && (
-        <Marker position={userLocation} icon={newMarkerIcon}>
+        <Marker position={userLocation} icon={userLocationIcon}>
           <Popup>Your current location</Popup>
         </Marker>
       )}

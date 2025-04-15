@@ -31,7 +31,8 @@ const Home: React.FC = () => {
     setShowUserMarker,
     handleLocateUser,
     resetLocationState,
-    cancelGeolocation
+    cancelGeolocation,
+    DETAIL_ZOOM
   } = useGeolocation();
 
   const {
@@ -52,7 +53,6 @@ const Home: React.FC = () => {
   } = useFormSubmission({
     userLocation,
     setIsSubmitting,
-    resetLocationState,
     setPendingMarker,
     addMarker,
     setMarkers,
@@ -69,8 +69,8 @@ const Home: React.FC = () => {
     setShowForm(true);
     
     try {
-      // Then try to get the user's location
-      await handleLocateUser();
+      // Then try to get the user's location with detailed zoom level
+      await handleLocateUser(DETAIL_ZOOM);
     } catch (error) {
       console.error('Error getting location:', error);
       // Form will be hidden in case of error by the handleLocateUser function
