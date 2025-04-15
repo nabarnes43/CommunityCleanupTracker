@@ -4,8 +4,14 @@ import { LatLngTuple } from 'leaflet';
  * Represents a marker on the map with location and additional data
  */
 export interface Marker {
+  /** Unique identifier for the marker */
+  id?: string;
   /** Array with [latitude, longitude] coordinates */
   location: [number, number];
+  /** Optional latitude property that may be in server response */
+  latitude?: number;
+  /** Optional longitude property that may be in server response */
+  longitude?: number;
   /** Type of form used to create this marker */
   formType: string;
   /** Optional notes about the marker */

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './PinDataForm.css';
 import { PinDataFormProps, FormType } from '../../types';
 import DumpingForm from './DumpingForm';
 import StandingWaterForm from './StandingWaterForm';
 import StormwaterForm from './StormwaterForm';
-import CameraCapture from './CameraCapture';
+import ImageCapture from '../ImageCapture';
+// @ts-ignore
+import CalendarIcon from '../../img/Calendar.svg';
 
 /**
  * Interface for the form data state
@@ -54,6 +56,23 @@ const PinDataForm: React.FC<PinDataFormProps> = ({ onSubmit, onCancel }) => {
   });
 
   /**
+   * Set the current date when component mounts
+   */
+  useEffect(() => {
+    // Format the date as YYYY-MM-DD for the date input
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+    const day = String(today.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+    
+    setFormData(prevData => ({
+      ...prevData,
+      date: formattedDate
+    }));
+  }, []);
+
+  /**
    * Handle changes for text and select inputs
    * 
    * @param {React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>} e - The change event
@@ -81,197 +100,156 @@ const PinDataForm: React.FC<PinDataFormProps> = ({ onSubmit, onCancel }) => {
   };
 
   /**
-   * Unified file upload handler for both images and videos
+   * Unified file upload handler for all media files
    * 
    * @param {React.ChangeEvent<HTMLInputElement>} e - The change event
-   * @param {'images' | 'videos'} fileType - The type of files being uploaded
    */
-  const handleFileUpload = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    fileType: 'images' | 'videos'
-  ) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     
     const files = Array.from(e.target.files);
     
-    // Log file information for debugging
-    console.log(`${fileType} upload:`, files.map(f => ({
-      name: f.name,
-      type: f.type,
-      size: f.size
-    })));
-    console.log(`Current ${fileType} count:`, formData[fileType].length);
+    // Separate images and videos
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    const videoFiles = files.filter(file => file.type.startsWith('video/'));
     
-    // Skip empty files
-    const validFiles = files.filter(file => file.size > 0);
-    
-    // If no valid files after filtering, exit early
-    if (validFiles.length === 0) {
-      console.warn('No valid files found after filtering');
-      return;
-    }
-    
-    // Filter files to match the requested type
-    const typeFilteredFiles = validFiles.filter(file => {
-      if (fileType === 'images') {
-        return file.type.startsWith('image/');
+    // Process images
+    if (imageFiles.length > 0) {
+      const fileType = 'images';
+      console.log(`${fileType} upload:`, imageFiles.length);
+      
+      // Skip empty files
+      const validFiles = imageFiles.filter(file => file.size > 0);
+      
+      if (validFiles.length === 0) {
+        console.warn('No valid image files found after filtering');
       } else {
-        return file.type.startsWith('video/');
-      }
-    });
-    
-    // If no files match the requested type, exit early
-    if (typeFilteredFiles.length === 0) {
-      console.warn(`No ${fileType} found in the selected files`);
-      return;
-    }
-    
-    const maxFiles = fileType === 'images' ? 5 : 2; // 5 images or 2 videos
-    const maxSize = fileType === 'images' ? 10 * 1024 * 1024 : 50 * 1024 * 1024; // 10MB for images, 50MB for videos
-    
-    // Get the current files from state to ensure we have the latest count
-    const currentFiles = [...formData[fileType]];
-    console.log(`Current ${fileType} in state:`, currentFiles.map(f => ({
-      name: f.name,
-      type: f.type,
-      size: f.size
-    })));
-    
-    // Filter out duplicates
-    const uniqueFiles = typeFilteredFiles.filter(newFile => {
-      // For images, check exact matches
-      if (fileType === 'images') {
-        const isDuplicate = currentFiles.some(existingFile => 
-          existingFile.name === newFile.name && 
-          existingFile.size === newFile.size && 
-          existingFile.type === newFile.type
-        );
+        const maxFiles = 5; // 5 images
+        const maxSize = 10 * 1024 * 1024; // 10MB for images
         
-        if (isDuplicate) {
-          console.log(`Skipping duplicate image: ${newFile.name}`);
-        }
+        // Get the current files from state
+        const currentFiles = [...formData[fileType]];
         
-        return !isDuplicate;
-      } 
-      // For videos, use a more robust check
-      else {
-        // First check exact matches
-        let isDuplicate = currentFiles.some(existingFile => {
-          const exactMatch = existingFile.name === newFile.name && 
-                            existingFile.size === newFile.size && 
-                            existingFile.type === newFile.type;
-          
-          if (exactMatch) {
-            console.log(`Found exact duplicate video: ${newFile.name}`);
-          }
-          
-          return exactMatch;
-        });
-        
-        // If not an exact match, check if we have a video with similar size (within 5%)
-        if (!isDuplicate && currentFiles.length > 0) {
-          isDuplicate = currentFiles.some(existingFile => {
-            // Check if file sizes are within 5% of each other
-            const sizeDifference = Math.abs(existingFile.size - newFile.size);
-            const sizePercentage = sizeDifference / Math.max(existingFile.size, newFile.size);
-            const isSimilarSize = sizePercentage < 0.05 && existingFile.type === newFile.type;
-            
-            if (isSimilarSize) {
-              console.log(`Found similar video by size: ${newFile.name} vs ${existingFile.name}`, {
-                sizeDifference,
-                sizePercentage,
-                newFileSize: newFile.size,
-                existingFileSize: existingFile.size
+        // Check if adding these files would exceed the maximum allowed
+        if (currentFiles.length + validFiles.length > maxFiles) {
+          alert(`You can only upload up to ${maxFiles} images. You already have ${currentFiles.length}.`);
+        } else {
+          // Define allowed file types
+          const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+          // Validate file types
+          const invalidFiles = validFiles.filter(file => !validTypes.includes(file.type));
+          if (invalidFiles.length > 0) {
+            const invalidTypes = invalidFiles.map(f => f.type || 'unknown').join(', ');
+            alert(`Unsupported image format: ${invalidTypes}. Please use supported formats.`);
+          } else {
+            // Validate file sizes
+            const oversizedFiles = validFiles.filter(file => file.size > maxSize);
+            if (oversizedFiles.length > 0) {
+              alert(`Each image must be smaller than ${maxSize / (1024 * 1024)}MB.`);
+            } else {
+              // Update form data with valid files - append to existing files
+              setFormData(prevData => {
+                const updatedFiles = [...prevData[fileType], ...validFiles];
+                console.log(`Added ${validFiles.length} ${fileType} files. New total: ${updatedFiles.length}`);
+                return {
+                  ...prevData,
+                  [fileType]: updatedFiles
+                };
               });
             }
-            
-            return isSimilarSize;
-          });
+          }
         }
+      }
+    }
+    
+    // Process videos
+    if (videoFiles.length > 0) {
+      const fileType = 'videos';
+      console.log(`${fileType} upload:`, videoFiles.length);
+      
+      // Skip empty files
+      const validFiles = videoFiles.filter(file => file.size > 0);
+      
+      if (validFiles.length === 0) {
+        console.warn('No valid video files found after filtering');
+      } else {
+        const maxFiles = 2; // 2 videos
+        const maxSize = 50 * 1024 * 1024; // 50MB for videos
         
-        if (isDuplicate) {
-          console.log(`Skipping duplicate video: ${newFile.name}`);
+        // Get the current files from state
+        const currentFiles = [...formData[fileType]];
+        
+        // Check if adding these files would exceed the maximum allowed
+        if (currentFiles.length + validFiles.length > maxFiles) {
+          alert(`You can only upload up to ${maxFiles} videos. You already have ${currentFiles.length}.`);
         } else {
-          console.log(`Adding new unique video: ${newFile.name}`);
+          // Define allowed file types
+          const validTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo'];
+
+          // Validate file types
+          const invalidFiles = validFiles.filter(file => !validTypes.includes(file.type));
+          if (invalidFiles.length > 0) {
+            const invalidTypes = invalidFiles.map(f => f.type || 'unknown').join(', ');
+            alert(`Unsupported video format: ${invalidTypes}. Please use supported formats.`);
+          } else {
+            // Validate file sizes
+            const oversizedFiles = validFiles.filter(file => file.size > maxSize);
+            if (oversizedFiles.length > 0) {
+              alert(`Each video must be smaller than ${maxSize / (1024 * 1024)}MB.`);
+            } else {
+              // Update form data with valid files - append to existing files
+              setFormData(prevData => {
+                const updatedFiles = [...prevData[fileType], ...validFiles];
+                console.log(`Added ${validFiles.length} ${fileType} files. New total: ${updatedFiles.length}`);
+                return {
+                  ...prevData,
+                  [fileType]: updatedFiles
+                };
+              });
+            }
+          }
         }
-        
-        return !isDuplicate;
       }
-    });
-    
-    // If all files were duplicates, exit early
-    if (uniqueFiles.length === 0) {
-      console.warn('All files were duplicates, nothing to add');
-      return;
     }
-    
-    console.log(`Unique ${fileType} to add:`, uniqueFiles.length);
-    
-    // Check if adding these files would exceed the maximum allowed
-    if (currentFiles.length + uniqueFiles.length > maxFiles) {
-      alert(`You can only upload up to ${maxFiles} ${fileType}. You already have ${currentFiles.length}.`);
-      return;
-    }
-    
-    // Define allowed file types
-    const validTypes = fileType === 'images' 
-      ? ['image/jpeg', 'image/png', 'image/gif']
-      : ['video/mp4', 'video/quicktime', 'video/x-msvideo'];
-
-    // Validate file types
-    const invalidFiles = uniqueFiles.filter(file => !validTypes.includes(file.type));
-    if (invalidFiles.length > 0) {
-      const invalidTypes = invalidFiles.map(f => f.type || 'unknown').join(', ');
-      alert(`Unsupported ${fileType.slice(0, -1)} format: ${invalidTypes}. Please use supported formats.`);
-      return;
-    }
-
-    // Validate file sizes
-    const oversizedFiles = uniqueFiles.filter(file => file.size > maxSize);
-    if (oversizedFiles.length > 0) {
-      alert(`Each ${fileType.slice(0, -1)} must be smaller than ${maxSize / (1024 * 1024)}MB.`);
-      return;
-    }
-
-    // Update form data with valid files - append to existing files
-    setFormData(prevData => {
-      // Make sure we're working with the latest state
-      const updatedFiles = [...prevData[fileType], ...uniqueFiles];
-      
-      // Double-check we're not exceeding the limit (defensive programming)
-      if (updatedFiles.length > maxFiles) {
-        console.warn(`Attempted to add too many ${fileType}, truncating to ${maxFiles}`);
-        const truncatedFiles = updatedFiles.slice(0, maxFiles);
-        console.log(`Added ${truncatedFiles.length - prevData[fileType].length} ${fileType} files. New total: ${truncatedFiles.length}`);
-        return {
-          ...prevData,
-          [fileType]: truncatedFiles
-        };
-      }
-      
-      console.log(`Added ${uniqueFiles.length} ${fileType} files. New total: ${updatedFiles.length}`);
-      return {
-        ...prevData,
-        [fileType]: updatedFiles
-      };
-    });
   };
 
   /**
-   * Handle removing a file
+   * Handle removing a file - adapted for the unified media approach
    * 
-   * @param {'images' | 'videos'} fileType - The type of file to remove
    * @param {number} index - The index of the file to remove
    */
-  const handleRemoveFile = (fileType: 'images' | 'videos', index: number) => {
-    console.log(`Removing ${fileType} at index ${index}`);
+  const handleRemoveFile = (index: number) => {
+    // Create a combined array of all media
+    const allMedia = [...formData.images, ...formData.videos];
+    const fileToRemove = allMedia[index];
+    
+    if (!fileToRemove) {
+      console.error(`No file found at index ${index}`);
+      return;
+    }
+    
+    // Determine if it's an image or video
+    const fileType = fileToRemove.type.startsWith('image/') ? 'images' : 'videos';
+    
+    // Calculate the correct index in the original array
+    let originalIndex;
+    if (fileType === 'images') {
+      originalIndex = index;
+    } else {
+      // If it's a video, the index is relative to the videos array
+      // which starts after all images
+      originalIndex = index - formData.images.length;
+    }
+    
+    console.log(`Removing ${fileType} at original index ${originalIndex}`);
     
     setFormData(prevData => {
       // Create a copy of the current files
       const updatedFiles = [...prevData[fileType]];
       
       // Remove the file at the specified index
-      updatedFiles.splice(index, 1);
+      updatedFiles.splice(originalIndex, 1);
       
       console.log(`Removed ${fileType} file. New total: ${updatedFiles.length}`);
       
@@ -343,85 +321,113 @@ const PinDataForm: React.FC<PinDataFormProps> = ({ onSubmit, onCancel }) => {
       <h3>Enter Pin Details</h3>
 
       {/* Form Type Selection */}
-      <label>Select Form Type:</label>
-      <select 
-        name="formType" 
-        value={formData.formType} 
-        onChange={handleFormTypeChange} 
-        required
-      >
-        <option value="">Choose Type</option>
-        <option value={FormType.DUMPING}>Illegal Dumping</option>
-        <option value={FormType.STANDING_WATER}>Standing Water Infrastructure</option>
-        <option value={FormType.STORMWATER}>Stormwater Infrastructure Problem</option>
-      </select>
+      <div className="text-input-container">
+        <div className="input-header">
+          <label>Select Issue Type:</label>
+        </div>
+        <select 
+          className="selector"
+          name="formType" 
+          value={formData.formType} 
+          onChange={handleFormTypeChange} 
+          required
+        >
+          <option value="">Choose Type</option>
+          <option value={FormType.DUMPING}>Illegal Dumping</option>
+          <option value={FormType.STANDING_WATER}>Standing Water Infrastructure</option>
+          <option value={FormType.STORMWATER}>Stormwater Infrastructure Problem</option>
+        </select>
+      
+        {/* Render the appropriate form based on the selected form type */}
+        {formData.formType === FormType.DUMPING && (
+          <DumpingForm
+            typeOfDumping={formData.typeOfDumping}
+            locationOfDumping={formData.locationOfDumping}
+            amountOfDumping={formData.amountOfDumping}
+            onInputChange={handleInputChange}
+          />
+        )}
 
-      {/* Render the appropriate form based on the selected form type */}
-      {formData.formType === FormType.DUMPING && (
-        <DumpingForm
-          typeOfDumping={formData.typeOfDumping}
-          locationOfDumping={formData.locationOfDumping}
-          amountOfDumping={formData.amountOfDumping}
-          onInputChange={handleInputChange}
-        />
-      )}
+        {formData.formType === FormType.STANDING_WATER && (
+          <StandingWaterForm
+            weatherCondition={formData.weatherCondition}
+            standingWaterLocation={formData.standingWaterLocation}
+            presenceOfMold={formData.presenceOfMold}
+            onInputChange={handleInputChange}
+          />
+        )}
 
-      {formData.formType === FormType.STANDING_WATER && (
-        <StandingWaterForm
-          weatherCondition={formData.weatherCondition}
-          standingWaterLocation={formData.standingWaterLocation}
-          presenceOfMold={formData.presenceOfMold}
-          onInputChange={handleInputChange}
-        />
-      )}
-
-      {formData.formType === FormType.STORMWATER && (
-        <StormwaterForm
-          stormwaterProblemLocation={formData.stormwaterProblemLocation}
-          stormwaterProblemType={formData.stormwaterProblemType}
-          causeOfClog={formData.causeOfClog}
-          onInputChange={handleInputChange}
-        />
-      )}
+        {formData.formType === FormType.STORMWATER && (
+          <StormwaterForm
+            stormwaterProblemLocation={formData.stormwaterProblemLocation}
+            stormwaterProblemType={formData.stormwaterProblemType}
+            causeOfClog={formData.causeOfClog}
+            onInputChange={handleInputChange}
+          />
+        )}
+      </div>
 
       {/* Replace FileUploadSection with CameraCapture */}
-      <CameraCapture
-        images={formData.images}
-        videos={formData.videos}
+      <ImageCapture
+        mediaFiles={[...formData.images, ...formData.videos]}
         onFileUpload={handleFileUpload}
         onRemoveFile={handleRemoveFile}
       />
 
       {/* Common Fields */}
-      <label>Any Notes or Observations:</label>
-      <textarea
-        name="notes"
-        placeholder="Enter some notes"
-        maxLength={150}
-        value={formData.notes}
-        onChange={handleInputChange}
-      />
+      <div className="text-input-container">
+        <div className="input-header">
+          <label>Any Notes or Observations:</label>
+        </div>
+        <div className="input-field">
+          <textarea
+            className="input-field-text" // Ensure this class is applied
+            name="notes"
+            placeholder="Enter some notes"
+            maxLength={150}
+            value={formData.notes}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+      </div>
+      
+      <div className="text-input-container">
+        <div className="input-header">
+          <label>How Does This Observation Make You Feel?:</label>
+        </div>
+        <div className="input-field">
+          <textarea
+            className="input-field-text"
+            name="moodNotes"
+            placeholder="Enter a mood"
+            maxLength={150}
+            value={formData.moodNotes}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+      </div>
 
-      <label>How Does This Observation Make You Feel?:</label>
-      <textarea
-        name="moodNotes"
-        placeholder="Enter a mood"
-        maxLength={150}
-        value={formData.moodNotes}
-        onChange={handleInputChange}
-      />
+      <div className="text-input-container">
+        <div className="input-header">
+          <label>Date Observed:</label>
+        </div>
+        <div className="date-input-container">
+          <input
+            className="date-input"
+            type="date"
+            name="date"
+            value={formData.date}
+            onChange={handleInputChange}
+            required
+          />
+          <img src={CalendarIcon} alt="Calendar" className="date-icon" />
+        </div>
+      </div>
 
-      <label>Date Observed:</label>
-      <input
-        type="date"
-        name="date"
-        value={formData.date}
-        onChange={handleInputChange}
-        required
-      />
-
-      <button type="submit">Add Pin</button>
-      <button type="button" onClick={onCancel}>Cancel</button>
+      <button className="form-button" type="submit">Add Pin</button>
+      <button className="form-button" type="button" onClick={onCancel}>Cancel</button>
     </form>
   );
 };
