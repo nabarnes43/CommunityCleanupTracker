@@ -1,34 +1,31 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { LatLngTuple } from 'leaflet';
 
 /**
- * Custom hook to handle geolocation functionality
- * Manages user location state, permissions, and error handling
- * 
- * @returns Object containing location state and functions
+ * Custom hook for handling map geolocation features
+ * @returns Geolocation state and functions
  */
 export const useGeolocation = () => {
-  // Default location (Atlanta)
+  // Constants
   const DEFAULT_LOCATION: LatLngTuple = [33.7501, -84.3885];
   const DEFAULT_ZOOM = 13;
   const DETAIL_ZOOM = 18;
 
-  // State for location-related data
+  // State
   const [mapCenter, setMapCenter] = useState<LatLngTuple>(DEFAULT_LOCATION);
   const [userLocation, setUserLocation] = useState<LatLngTuple | null>(null);
   const [mapZoom, setMapZoom] = useState<number>(DEFAULT_ZOOM);
   const [isGeolocating, setIsGeolocating] = useState<boolean>(false);
   const [showUserMarker, setShowUserMarker] = useState<boolean>(false);
   
-  // Reference to store the current geolocation request
+  // Reference to geolocation watch ID
   const geoWatchIdRef = useRef<number | null>(null);
 
   /**
-   * Cancel any ongoing geolocation operations
+   * Cancel active geolocation watch
    */
   const cancelGeolocation = useCallback(() => {
     if (geoWatchIdRef.current !== null) {
-      console.log('Cancelling geolocation request ID:', geoWatchIdRef.current);
       navigator.geolocation.clearWatch(geoWatchIdRef.current);
       geoWatchIdRef.current = null;
       setIsGeolocating(false);
@@ -36,178 +33,90 @@ export const useGeolocation = () => {
   }, []);
 
   /**
-   * Reset location state to defaults
+   * Reset map to default state
    */
   const resetLocationState = useCallback(() => {
-    // Cancel any ongoing geolocation first
     cancelGeolocation();
-    
-    setShowUserMarker(false);
     setMapZoom(DEFAULT_ZOOM);
     setMapCenter(DEFAULT_LOCATION);
     setIsGeolocating(false);
   }, [cancelGeolocation]);
 
   /**
-   * Handle locating the user and showing the marker
-   * Returns a promise that resolves when location is obtained
+   * Get user's location, center map on it, and zoom in
+   * @param zoomLevel The zoom level to set (defaults to DETAIL_ZOOM)
+   * @returns Promise resolving to the found location
    */
-  const handleLocateUser = useCallback(() => {
+  const handleLocateUser = useCallback((zoomLevel = DETAIL_ZOOM) => {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser. This feature requires location access to work.');
+      alert('Geolocation is not supported by your browser.');
       return Promise.reject(new Error('Geolocation not supported'));
     }
     
-    // Cancel any previous geolocation request
     cancelGeolocation();
-    
-    // Set geolocating state to true
     setIsGeolocating(true);
     
-    console.log('Requesting user location...');
-    
     return new Promise<LatLngTuple>((resolve, reject) => {
-      // First check if we can determine permission status
-      if (navigator.permissions && navigator.permissions.query) {
-        navigator.permissions.query({ name: 'geolocation' })
-          .then(permissionStatus => {
-            console.log('Geolocation permission status:', permissionStatus.state);
-            
-            // If permission is denied, alert the user
-            if (permissionStatus.state === 'denied') {
-              console.error('Geolocation permission is denied');
-              alert('Location access is denied. Please enable location access in your browser settings and try again.');
-              
-              setIsGeolocating(false);
-              reject(new Error('Geolocation permission denied'));
-              return;
-            }
-            
-            // If permission is prompt, tell the user to accept the prompt
-            if (permissionStatus.state === 'prompt') {
-              console.log('User will be prompted for geolocation permission');
-              // Continue with geolocation request below
-            }
-            
-            // Listen for permission changes
-            permissionStatus.addEventListener('change', () => {
-              console.log('Geolocation permission changed to:', permissionStatus.state);
-            });
-            
-            // Continue with geolocation request
-            requestGeolocation(resolve, reject);
-          })
-          .catch(error => {
-            console.error('Error checking geolocation permission:', error);
-            // Fall back to direct geolocation request
-            requestGeolocation(resolve, reject);
-          });
-      } else {
-        // Browser doesn't support permission API, fall back to direct geolocation request
-        console.log('Permissions API not supported, falling back to direct geolocation request');
-        requestGeolocation(resolve, reject);
-      }
-    });
-  }, []);
-
-  /**
-   * Internal function to handle the actual geolocation request
-   */
-  const requestGeolocation = (resolve: (value: LatLngTuple) => void, reject: (reason: Error) => void) => {
-    console.log('Executing geolocation request...');
-    
-    // Try multiple times with different accuracy settings if needed
-    let hasTriedLowAccuracy = false;
-    
-    function tryGeolocation(highAccuracy = true) {
-      // Request location with appropriate accuracy option
       const watchId = navigator.geolocation.watchPosition(
-        // Success callback
+        // Success handler
         (position) => {
           const { latitude, longitude } = position.coords;
-          console.log('Location obtained successfully:', latitude, longitude);
-          
           const location: LatLngTuple = [latitude, longitude];
           
-          // Store the location in state for later use
+          // Update all state
           setUserLocation(location);
-          
-          // Update map center
-          setMapCenter(location);
-          
-          // Set a higher zoom level for better detail
-          setMapZoom(DETAIL_ZOOM);
-          
-          // Show the user marker
           setShowUserMarker(true);
-          
-          // Log the current state for debugging
-          console.log('Location state updated:', {
-            userLocation: location,
-            mapCenter: location,
-            mapZoom: DETAIL_ZOOM,
-            showUserMarker: true
-          });
-          
-          // Reset geolocating state
+          setMapCenter(location);
+          setMapZoom(zoomLevel);
           setIsGeolocating(false);
           
-          // Clear the watch since we got a position
-          navigator.geolocation.clearWatch(watchId);
-          geoWatchIdRef.current = null;
+          // Clean up
+          if (geoWatchIdRef.current !== null) {
+            navigator.geolocation.clearWatch(geoWatchIdRef.current);
+            geoWatchIdRef.current = null;
+          }
           
-          // Resolve the promise with the location
           resolve(location);
         },
-        // Error callback
+        // Error handler
         (error) => {
-          console.error('Error getting location:', error, 'Using high accuracy:', highAccuracy);
-          
-          // If high accuracy failed, try with low accuracy
-          if (highAccuracy && !hasTriedLowAccuracy) {
-            console.log('Retrying with low accuracy...');
-            hasTriedLowAccuracy = true;
-            tryGeolocation(false);
-            return;
-          }
-          
-          // Reset geolocating state
           setIsGeolocating(false);
-          // Make sure user marker is hidden
-          setShowUserMarker(false);
           
-          // Provide specific feedback based on the error
-          let errorMessage: string;
-          switch (error.code) {
+          let message: string;
+          switch(error.code) {
             case error.PERMISSION_DENIED:
-              errorMessage = 'Location access was denied. We need location access to accurately report issues in your community. Please enable location access in your browser settings and try again.';
+              message = 'Location access was denied. Please enable location access in your browser settings.';
               break;
             case error.POSITION_UNAVAILABLE:
-              errorMessage = 'Location information is unavailable. Please try again later or check your device settings.';
+              message = 'Location information is unavailable. Please try again later.';
               break;
             case error.TIMEOUT:
-              errorMessage = 'The request to get your location timed out. Please try again.';
+              message = 'The request to get your location timed out. Please try again.';
               break;
             default:
-              errorMessage = 'An unknown error occurred while trying to access your location. Please try again.';
-              break;
+              message = 'An unknown error occurred while trying to access your location.';
           }
           
-          alert(errorMessage);
-          reject(new Error(errorMessage));
+          reject(new Error(message));
         },
-        // Options
         {
-          enableHighAccuracy: highAccuracy,
-          timeout: highAccuracy ? 15000 : 30000, // Longer timeout for low accuracy
-          maximumAge: highAccuracy ? 0 : 60000 // Allow cached position for low accuracy
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
         }
       );
-    }
-    
-    // Start with high accuracy
-    tryGeolocation(true);
-  };
+      
+      geoWatchIdRef.current = watchId;
+    });
+  }, [cancelGeolocation]);
+
+  
+  // Get user location on component mount with default zoom
+  useEffect(() => {
+    handleLocateUser(DEFAULT_ZOOM).catch(() => {
+      console.log('Could not get initial location');
+    });
+  }, [handleLocateUser]);
 
   return {
     mapCenter,

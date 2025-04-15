@@ -29,29 +29,21 @@ const MapUpdater: React.FC<MapUpdaterProps> = ({ userLocation, mapZoom = 18 }) =
       console.error('MapUpdater: Invalid user location format', userLocation);
       return;
     }
+      
+    console.log('MapUpdater: Updating map view to:', userLocation, 'zoom:', mapZoom);
     
-    // Check if the location has changed
-    const hasLocationChanged = !previousLocation.current || 
-      userLocation[0] !== previousLocation.current[0] || 
-      userLocation[1] !== previousLocation.current[1];
+    try {
+      map.flyTo(userLocation, mapZoom, {
+        duration: 1, // Faster animation for better user experience
+      });
       
-    if (hasLocationChanged) {
-      console.log('MapUpdater: Updating map view to:', userLocation, 'zoom:', mapZoom);
-      
-      try {
-        map.flyTo(userLocation, mapZoom, {
-          duration: 1, // Faster animation for better user experience
-        });
-        
-        // Update the previous location reference
-        previousLocation.current = userLocation;
-        console.log('MapUpdater: Map view updated successfully');
-      } catch (error) {
-        console.error('MapUpdater: Error updating map view:', error);
-      }
-    } else {
-      console.log('MapUpdater: Location unchanged, not updating map');
+      // Update the previous location reference
+      previousLocation.current = userLocation;
+      console.log('MapUpdater: Map view updated successfully');
+    } catch (error) {
+      console.error('MapUpdater: Error updating map view:', error);
     }
+
   }, [userLocation, mapZoom, map]); // Dependencies for the effect
 
   return null; // This component doesn't render anything itself

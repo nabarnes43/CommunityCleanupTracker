@@ -9,7 +9,6 @@ import { Marker as MarkerType } from '../../../types';
 interface UseFormSubmissionProps {
   userLocation: LatLngTuple | null;
   setIsSubmitting: (value: boolean) => void;
-  resetLocationState: () => void;
   setPendingMarker: (marker: LatLngTuple | null) => void;
   addMarker: (marker: MarkerType) => void;
   setMarkers: React.Dispatch<React.SetStateAction<MarkerType[]>>;
@@ -27,7 +26,6 @@ interface UseFormSubmissionProps {
 export const useFormSubmission = ({
   userLocation,
   setIsSubmitting,
-  resetLocationState,
   setPendingMarker,
   addMarker,
   setMarkers,
@@ -39,16 +37,15 @@ export const useFormSubmission = ({
 
   /**
    * Handle form cancellation
-   * Clears the user location pin from the map and cancels any ongoing geolocation
+   * Resets the map state and clears any pending markers
    */
   const handleFormCancel = useCallback(() => {
     setShowForm(false);
-    setShowUserMarker(false);
+    // Don't hide user marker anymore - we want it to stay visible
     // Cancel any in-progress geolocation
     cancelGeolocation();
-    resetLocationState();
     setPendingMarker(null);
-  }, [resetLocationState, setPendingMarker, setShowUserMarker, cancelGeolocation]);
+  }, [setPendingMarker, cancelGeolocation]);
 
   /**
    * Handle form submission for adding a new marker
@@ -136,7 +133,6 @@ export const useFormSubmission = ({
       
       // Clean up
       setShowForm(false);
-      resetLocationState();
       
       console.log('Form submitted successfully');
     } catch (error) {
