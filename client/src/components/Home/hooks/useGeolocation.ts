@@ -97,10 +97,6 @@ export const useGeolocation = () => {
               message = 'An unknown error occurred while trying to access your location.';
           }
           
-          // For initial load, don't show alert
-          if (!isInitialLoadRef.current) {
-            alert(message);
-          }
           reject(new Error(message));
         },
         {
@@ -114,17 +110,12 @@ export const useGeolocation = () => {
     });
   }, [cancelGeolocation]);
 
-  // Track if this is the initial load
-  const isInitialLoadRef = useRef(true);
   
   // Get user location on component mount with default zoom
   useEffect(() => {
     handleLocateUser(DEFAULT_ZOOM).catch(() => {
       console.log('Could not get initial location');
     });
-    
-    // After first attempt, set initial load to false
-    isInitialLoadRef.current = false;
   }, [handleLocateUser]);
 
   return {
