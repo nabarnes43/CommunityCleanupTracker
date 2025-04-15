@@ -1,12 +1,14 @@
 import React from 'react';
-import { customIcon } from '../mapIcons';
+import { customIcon, navigationIcon, navigationBackgroundIcon } from '../mapIcons';
 
 /**
  * Props for the MapControls component
  */
 interface MapControlsProps {
   onReportIssue: () => void;
+  onLocationClick: () => void;
   disabled: boolean;
+  isDetailedView: boolean;
 }
 
 /**
@@ -17,24 +19,44 @@ interface MapControlsProps {
  */
 const MapControls: React.FC<MapControlsProps> = ({
   onReportIssue,
-  disabled
+  onLocationClick,
+  disabled,
+  isDetailedView
 }) => {
   return (
-    <button 
-      onClick={onReportIssue}
-      disabled={disabled}
-      className="pin-button"
-      aria-label="Drop a Pin Report an issue"
-    >
-      <div 
-        className="pin-icon"
-        style={{ 
-          backgroundImage: `url(${customIcon.options.iconUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      ></div>
-    </button>
+    <div className="map-controls">
+      <button 
+        onClick={onReportIssue}
+        disabled={disabled}
+        className="pin-button"
+        aria-label="Drop a Pin Report an issue"
+      >
+        <div 
+          className="pin-icon"
+          style={{ 
+            backgroundImage: `url(${customIcon.options.iconUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        ></div>
+      </button>
+      
+      <button
+        onClick={onLocationClick}
+        disabled={disabled}
+        className="location-button"
+        aria-label="Toggle location tracking"
+      >
+        <div 
+          className={`location-icon ${isDetailedView ? 'detailed' : ''}`}
+          style={{ 
+            backgroundImage: `url(${isDetailedView ? navigationIcon.options.iconUrl : navigationBackgroundIcon.options.iconUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        ></div>
+      </button>
+    </div>
   );
 };
 

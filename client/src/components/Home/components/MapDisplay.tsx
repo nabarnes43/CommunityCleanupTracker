@@ -1,5 +1,5 @@
 import React from 'react';
-import { Marker, Popup } from 'react-leaflet';
+import { Marker, Popup, useMap } from 'react-leaflet';
 import { LatLngTuple } from 'leaflet';
 import { Marker as MarkerType } from '../../../types';
 import { newMarkerIcon, userLocationIcon } from '../mapIcons';
@@ -15,6 +15,7 @@ interface MapDisplayProps {
   markers: MarkerType[];
   pendingMarker: LatLngTuple | null;
   mapZoom: number;
+  setMapRef?: (mapRef: L.Map) => void;
 }
 
 /**
@@ -28,8 +29,18 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
   showUserMarker,
   markers,
   pendingMarker,
-  mapZoom
+  mapZoom,
+  setMapRef
 }) => {
+  const map = useMap();
+  
+  // Pass the map reference up to parent
+  React.useEffect(() => {
+    if (setMapRef) {
+      setMapRef(map);
+    }
+  }, [map, setMapRef]);
+  
   return (
     <>
       {/* Update map when user location changes */}

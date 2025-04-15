@@ -18,6 +18,20 @@ export const newMarkerIcon = new L.Icon({
 });
 
 /**
+ * Navigation icon for location tracking
+ */
+export const navigationIcon = new L.Icon({
+  iconUrl: require('../../img/Navigation.png'),
+});
+
+/**
+ * Navigation icon for location tracking
+ */
+export const navigationBackgroundIcon = new L.Icon({
+  iconUrl: require('../../img/NavigationBackground.png'),
+});
+
+/**
  * Circle icon with white border and dark green background
  * Uses Leaflet's divIcon for custom styling through CSS
  * Includes a pulsing animation and high z-index to display above other map elements
