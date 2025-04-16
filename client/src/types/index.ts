@@ -26,6 +26,8 @@ export interface Marker {
   videos?: string[];
   /** Optional popup text for the marker */
   popUp?: string;
+  /** Optional object containing form-specific details */
+  details?: Record<string, any>;
   
   // Dumping form specific fields
   typeOfDumping?: string;

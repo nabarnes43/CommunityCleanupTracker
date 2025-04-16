@@ -82,10 +82,19 @@ const MarkerClusterComponent: React.FC<MarkerClusterProps> = ({ markers }) => {
           const popupContent = `
             <div class="map-popup">
               <h3>${marker.formType || 'Unknown Type'}</h3>
-              ${isNewMarker ? '<p><strong>Status:</strong> Just added</p>' : ''}
-              ${marker.notes ? `<p><strong>Notes:</strong> ${marker.notes}</p>` : ''}
+              ${isNewMarker ? '<p style="border: 2px solid red; padding: 5px; border-radius: 4px;"><strong>Status:</strong> Just added</p>' : ''}
               ${marker.date ? `<p><strong>Date:</strong> ${new Date(marker.date + 'T12:00:00').toLocaleDateString()}</p>` : ''}              
-              ${marker.moodNotes ? `<p><strong>Mood Notes:</strong> ${marker.moodNotes}</p>` : ''}
+              ${marker.details && Object.keys(marker.details).length > 0 ? `
+                  ${Object.entries(marker.details)
+                    .filter(([_, value]) => value !== null && value !== '')
+                    .map(([key, value]) => {
+                      // Format key from camelCase to Title Case (e.g., typeOfDumping → Type Of Dumping)
+                      const formattedKey = key.replace(/([A-Z])/g, ' $1')
+                        .replace(/^./, str => str.toUpperCase());
+                      return `<p><strong>${formattedKey}:</strong> ${value}</p>`;
+                    }).join('')}
+              ` : ''}
+              ${marker.notes ? `<p><strong>Notes:</strong> ${marker.notes}</p>` : ''}
               ${createImagesSection(marker.images)}
             </div>
           `;
@@ -93,12 +102,7 @@ const MarkerClusterComponent: React.FC<MarkerClusterProps> = ({ markers }) => {
           // Create marker with popup
           const leafletMarker = L.marker(marker.location, { icon })
             .bindPopup(popupContent, {
-              maxWidth: 300,
-              maxHeight: 400,
-              autoPanPadding: [50, 50],
-              closeButton: true,
-              className: popupClass
-            });
+          });
           
           // If this is the new marker, store it separately
           if (isNewMarker) {
