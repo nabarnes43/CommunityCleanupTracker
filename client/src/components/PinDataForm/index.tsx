@@ -5,7 +5,6 @@ import DumpingForm from './DumpingForm';
 import StandingWaterForm from './StandingWaterForm';
 import StormwaterForm from './StormwaterForm';
 import ImageCapture from '../ImageCapture';
-// @ts-ignore
 import CalendarIcon from '../../img/Calendar.svg';
 
 /**

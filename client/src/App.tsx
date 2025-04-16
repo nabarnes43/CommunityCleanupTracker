@@ -4,6 +4,7 @@ import Home from './components/Home';
 import About from './components/About';
 // import { UserList, CreateUser, UpdateUser, DeleteUser } from './components/User';
 import Navbar from './components/Navbar';
+import PinList from './components/PinList';
 // import CameraComponent from './components/ImageCapture/TestCamera';
 // import ImageCaptureDemo from './components/ImageCapture/ImageCaptureDemo';
 
@@ -20,6 +21,7 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
+            <Route path="/list" element={<PinList />} />
             {/* Commented out routes for future use
             <Route path="/users" element={<UserList />} />
             <Route path="/users/create" element={<CreateUser />} />
