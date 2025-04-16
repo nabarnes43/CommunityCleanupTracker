@@ -14,7 +14,8 @@ export const customIcon = new L.Icon({
  */
 export const newMarkerIcon = new L.Icon({
   iconUrl: require('../../img/newMarker.png'),
-  iconSize: [50, 50]
+  iconSize: [50, 50],
+  zIndexOffset: 1000
 });
 
 /**

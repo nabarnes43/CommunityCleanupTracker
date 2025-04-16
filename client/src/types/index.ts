@@ -74,6 +74,8 @@ export interface PinDataFormProps {
   onSubmit: (formData: FormData) => void;
   /** Callback function when form is cancelled */
   onCancel: () => void;
+  /** Whether the form is currently submitting */
+  isSubmitting?: boolean;
 }
 
 /**
