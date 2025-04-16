@@ -57,31 +57,12 @@ const MarkerClusterComponent: React.FC<MarkerClusterProps> = ({ markers }) => {
       `;
     };
 
-    // Helper function to create video HTML - separated for clarity
-    const createVideosSection = (videos?: string[]) => {
-      if (!videos?.length) return '';
-      return `
-        <div class="popup-videos">
-          ${videos.map(url => `
-            <div class="video-container">
-              <video 
-                controls 
-                width="200" 
-                style="margin: 2px; border-radius: 4px;"
-                preload="metadata"
-              >
-                <source src="${url}" type="video/mp4">
-                Your browser does not support the video tag.
-              </video>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    };
-
     // Get the newly created marker ID from session storage
     const newMarkerID = sessionStorage.getItem('newMarkerID');
     console.log('New marker ID from session storage:', newMarkerID);
+
+    // Track new marker separately
+    let newMarker: L.Marker | null = null;
 
     // Process markers if they exist
     if (markers?.length > 0) {
@@ -101,34 +82,40 @@ const MarkerClusterComponent: React.FC<MarkerClusterProps> = ({ markers }) => {
           const popupContent = `
             <div class="map-popup">
               <h3>${marker.formType || 'Unknown Type'}</h3>
-              ${isNewMarker ? '<p><strong>Status:</strong> Just added</p>' : ''}
+              ${isNewMarker ? '<p style="border: 2px solid red; padding: 5px; border-radius: 4px;"><strong>Status:</strong> Just added</p>' : ''}
+              ${marker.date ? `<p><strong>Date:</strong> ${new Date(marker.date + 'T12:00:00').toLocaleDateString()}</p>` : ''}              
+              ${marker.details && Object.keys(marker.details).length > 0 ? `
+                  ${Object.entries(marker.details)
+                    .filter(([_, value]) => value !== null && value !== '')
+                    .map(([key, value]) => {
+                      // Format key from camelCase to Title Case (e.g., typeOfDumping → Type Of Dumping)
+                      const formattedKey = key.replace(/([A-Z])/g, ' $1')
+                        .replace(/^./, str => str.toUpperCase());
+                      return `<p><strong>${formattedKey}:</strong> ${value}</p>`;
+                    }).join('')}
+              ` : ''}
               ${marker.notes ? `<p><strong>Notes:</strong> ${marker.notes}</p>` : ''}
-              ${marker.date ? `<p><strong>Date:</strong> ${new Date(marker.date).toLocaleDateString()}</p>` : ''}
-              ${marker.moodNotes ? `<p><strong>Mood Notes:</strong> ${marker.moodNotes}</p>` : ''}
               ${createImagesSection(marker.images)}
-              ${createVideosSection(marker.videos)}
             </div>
           `;
 
-          // Create and add the marker to the cluster group
-          const leafletMarker = L.marker(marker.location, { icon });
+          // Create marker with popup
+          const leafletMarker = L.marker(marker.location, { icon })
+            .bindPopup(popupContent, {
+          });
           
-          // If this is the new marker, open its popup automatically after a short delay
+          // If this is the new marker, store it separately
           if (isNewMarker) {
+            newMarker = leafletMarker;
+            
+            // Open popup automatically after a short delay
             setTimeout(() => {
               leafletMarker.openPopup();
             }, 500);
+          } else {
+            // Only add to cluster if it's not the new marker
+            leafletMarker.addTo(markerClusterGroup);
           }
-          
-          leafletMarker
-            .bindPopup(popupContent, {
-              maxWidth: 300,
-              maxHeight: 400,
-              autoPanPadding: [50, 50],
-              closeButton: true,
-              className: popupClass
-            })
-            .addTo(markerClusterGroup);
         } else {
           console.warn('Invalid marker location:', marker);
         }
@@ -136,12 +123,22 @@ const MarkerClusterComponent: React.FC<MarkerClusterProps> = ({ markers }) => {
 
       // Add the cluster group to the map
       map.addLayer(markerClusterGroup);
+      
+      // Add new marker directly to map if it exists
+      if (newMarker) {
+        map.addLayer(newMarker);
+      }
     }
 
     // Clean up when component unmounts
     return () => {
-      if (map && markerClusterGroup) {
-        map.removeLayer(markerClusterGroup);
+      if (map) {
+        if (markerClusterGroup) {
+          map.removeLayer(markerClusterGroup);
+        }
+        if (newMarker) {
+          map.removeLayer(newMarker);
+        }
       }
     };
   }, [map, markers]);
