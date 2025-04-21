@@ -1,53 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchMarkers } from '../../apiService';
-import { Marker, FormType } from '../../types';
+import { Marker } from '../../types';
+import { renderMarkerDescription } from '../../utils/formTypeUtils';
 import './PinList.css';
-
-/**
- * Renders the appropriate description based on the marker's form type
- * 
- * @param {Marker} marker - The marker data to display
- * @returns {JSX.Element} The formatted description
- */
-const renderMarkerDescription = (marker: Marker): JSX.Element => {
-  if (marker.formType === FormType.DUMPING) {
-    return (
-      <div className="description-content">
-        <span className="issue-type">Illegal Dumping: </span>
-        <div className="issue-details">
-          {marker.details?.typeOfDumping && <span><strong>Type:</strong> {marker.details.typeOfDumping}</span>}
-          {marker.details?.amountOfDumping && <span><strong>Amount:</strong> {marker.details.amountOfDumping}</span>}
-          {marker.details?.locationOfDumping && <span><strong>Location:</strong> {marker.details.locationOfDumping}</span>}
-        </div>
-      </div>
-    );
-  } else if (marker.formType === FormType.STANDING_WATER) {
-    return (
-      <div className="description-content">
-        <span className="issue-type">Standing Water: </span>
-        <div className="issue-details">
-          {marker.details?.weatherCondition && <span><strong>Weather:</strong> {marker.details.weatherCondition}</span>}
-          {marker.details?.standingWaterLocation && <span><strong>Location:</strong> {marker.details.standingWaterLocation}</span>}
-          {marker.details?.presenceOfMold && <span><strong>Mold Present:</strong> {marker.details.presenceOfMold ? 'Yes' : 'No'}</span>}
-        </div>
-      </div>
-    );
-  } else if (marker.formType === FormType.STORMWATER) {
-    return (
-      <div className="description-content">
-        <span className="issue-type">Stormwater Issue: </span>
-        <div className="issue-details">
-          {marker.details?.stormwaterProblemType && <span><strong>Issue:</strong> {marker.details.stormwaterProblemType}</span>}
-          {marker.details?.stormwaterProblemLocation && <span><strong>Location:</strong> {marker.details.stormwaterProblemLocation}</span>}
-          {marker.details?.causeOfClog && <span><strong>Cause:</strong> {marker.details.causeOfClog}</span>}
-        </div>
-      </div>
-    );
-  } else {
-    return <span className="issue-type">{marker.formType || 'Unknown Issue'}</span>;
-  }
-};
 
 /**
  * PinList component that displays a list of all markers/pins

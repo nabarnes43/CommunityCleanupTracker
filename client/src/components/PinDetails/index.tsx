@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchMarkers } from '../../apiService';
 import { Marker } from '../../types';
+import { renderFormTypeDetails } from '../../utils/formTypeUtils';
+import CalendarIcon from '../../img/Calendar.svg';
+import BackArrowIcon from '../../img/BackArrow.png';
 import './PinDetails.css';
 
 /**
@@ -65,79 +68,53 @@ const PinDetails: React.FC = () => {
   if (error || !pin) {
     return (
       <div className="pin-details-container">
+        <div className="back-arrow" onClick={handleBack}>
+          <img src={BackArrowIcon} alt="Back" />
+        </div>
         <div className="pin-details-error">{error || 'Pin not found'}</div>
-        <button className="back-button" onClick={handleBack}>Back to List</button>
       </div>
     );
   }
 
   return (
     <div className="pin-details-container">
-      <h1 className="pin-details-header">Pin Dumping Details Page</h1>
+      <div className="back-arrow" onClick={handleBack}>
+        <img src={BackArrowIcon} alt="Back" />
+      </div>
       
-      <div className="pin-details-card">
-        <h2 className="pin-details-title">{pin.formType}</h2>
-        
-        {pin.images && pin.images.length > 0 && (
-          <div className="pin-details-image">
-            <img src={pin.images[0]} alt={`${pin.formType} at location`} />
-          </div>
-        )}
-        
-        <div className="pin-details-info">
-          <div className="pin-details-item">
-            <h3>Location</h3>
-            <div className="pin-details-value">{formatAddress(pin.location)}</div>
-          </div>
-          
-          <div className="pin-details-item">
-            <h3>Date</h3>
-            <div className="pin-details-value date-value">
-              {formatDate(pin.date)}
-              <span className="calendar-icon">📅</span>
-            </div>
-          </div>
-          
-          <div className="pin-details-item">
-            <h3>Dumping Details:</h3>
-            <div className="pin-details-section">
-              <div className="pin-details-row">
-                <span className="pin-details-label">Type Of Dumping</span>
-                <span className="pin-details-value">{pin.details?.typeOfDumping || 'N/A'}</span>
-              </div>
-              
-              <div className="pin-details-row">
-                <span className="pin-details-label">Location Of Dumping</span>
-                <span className="pin-details-value">{pin.details?.locationOfDumping || 'N/A'}</span>
-              </div>
-              
-              <div className="pin-details-row">
-                <span className="pin-details-label">Amount Of Dumping</span>
-                <span className="pin-details-value">{pin.details?.amountOfDumping || 'N/A'}</span>
-              </div>
-            </div>
-          </div>
-          
-          {pin.notes && (
-            <div className="pin-details-item">
-              <h3>Notes</h3>
-              <div className="pin-details-value">{pin.notes}</div>
-            </div>
-          )}
-          
-          <div className="pin-details-item">
-            <h3>Mood</h3>
-            <div className="pin-details-mood">
-              <button className="mood-button active">☹️</button>
-              <button className="mood-button">😐</button>
-              <button className="mood-button">🙂</button>
-            </div>
-          </div>
+      <h2 className="pin-details-title">{pin.formType}</h2>
+      
+      {pin.images && pin.images.length > 0 && (
+        <div className="pin-details-image">
+          <img src={pin.images[0]} alt={`${pin.formType} at location`} />
+        </div>
+      )}
+      
+      <div className="pin-details-item">
+        <h3>Location</h3>
+        <div className="pin-details-value">{formatAddress(pin.location)}</div>
+      </div>
+      
+      <div className="pin-details-item">
+        <h3>Date</h3>
+        <div className="pin-details-value date-value">
+          {formatDate(pin.date)}
+          <span className="calendar-icon"><img src={CalendarIcon} alt="Calendar" /></span>
         </div>
       </div>
       
-      <div className="pin-details-navigation">
-        <button className="back-button" onClick={handleBack}>Back to List</button>
+      {renderFormTypeDetails(pin)}
+      
+      {pin.notes && (
+        <div className="pin-details-item">
+          <h3>Notes</h3>
+          <div className="pin-details-value">{pin.notes}</div>
+        </div>
+      )}
+      
+      <div className="pin-details-item">
+        <h3>Mood</h3>
+        <div className="pin-details-value">{pin.moodNotes}</div>
       </div>
     </div>
   );

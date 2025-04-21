@@ -1,71 +1,101 @@
 .pin-details-container {
-  padding: 20px;
-  max-width: 100%;
+  padding: 12px 12px 76px 12px;
   margin: 0 auto;
-  min-height: 100vh;
-  background-color: #1e1e1e;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background-color: #EAE0D5;
   color: #ffffff;
-  padding-bottom: 70px; /* Space for navbar at bottom */
+  position: relative;
 }
 
-.pin-details-header {
-  margin: 0 0 20px 0;
-  padding: 10px 0;
-  text-align: left;
-  font-size: 22px;
-  color: rgba(255, 255, 255, 0.8);
+.back-arrow {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  color: #000000;
+  background-color: #6c6063;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
 }
 
-.pin-details-card {
-  background-color: rgba(76, 76, 76, 0.4);
-  border-radius: 15px;
-  overflow: hidden;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+.back-arrow:hover {
+  background-color: #1f3323;
+}
+
+.back-arrow img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .pin-details-title {
-  padding: 15px;
+  border: 1px solid black;
+  border-radius: 8px;
+  padding: 8px;
   margin: 0;
-  background-color: rgba(150, 150, 150, 0.3);
-  font-size: 18px;
-  font-weight: 500;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #cebcb6;
+  font-size: 36px;
+  font-weight: bold;
   text-align: center;
 }
 
 .pin-details-image {
+  border-radius: 8px;
+  background-color: #cebcb6;
+  padding: 16px;
   width: 100%;
-  height: 200px;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
 }
 
 .pin-details-image img {
+  border: 1px solid #000000;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit:cover;
+  border-radius: 8px;
 }
 
-.pin-details-info {
-  padding: 15px;
-}
 
 .pin-details-item {
-  margin-bottom: 20px;
+  background-color: #cebcb6;
+  width: 100%;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .pin-details-item h3 {
-  margin: 0 0 10px 0;
-  font-size: 16px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
+  margin: 0;  
+  text-align: left;
+  font-size: 24px;
+  font-weight: bold;
+  color: #000000;
 }
 
 .pin-details-value {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
-  padding: 8px 10px;
-  background-color: rgba(60, 60, 60, 0.7);
-  border-radius: 6px;
-  margin-bottom: 5px;
+  border: 1px solid #000000;
+  font-size: 16px;
+  border-radius: 8px;
+  padding: 8px;
+  text-align: left;
+  color: #000000;
+  background-color: #EAE0D5;
 }
 
 .date-value {
@@ -79,75 +109,33 @@
 }
 
 .pin-details-section {
-  background-color: rgba(60, 60, 60, 0.7);
-  border-radius: 6px;
-  padding: 10px;
+  background-color: #cebcb6;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  gap: 8px;
 }
 
 .pin-details-row {
+  background-color: #EAE0D5;
+  border: 1px solid #000000;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
-  margin-bottom: 10px;
+  gap: 8px;
+  padding: 8px;
 }
 
 .pin-details-label {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #000000;
 }
 
-.pin-details-value {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.pin-details-mood {
-  display: flex;
-  gap: 15px;
-  padding: 10px;
-  justify-content: center;
-  background-color: rgba(60, 60, 60, 0.7);
-  border-radius: 6px;
-}
-
-.mood-button {
-  border: none;
-  background: transparent;
-  font-size: 24px;
-  cursor: pointer;
-  padding: 5px 10px;
-  border-radius: 50%;
-  transition: transform 0.2s;
-}
-
-.mood-button:hover {
-  transform: scale(1.2);
-}
-
-.mood-button.active {
-  background-color: rgba(147, 112, 219, 0.3);
-  box-shadow: 0 0 8px rgba(147, 112, 219, 0.5);
-}
-
-.pin-details-navigation {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.back-button {
-  padding: 10px 20px;
-  background-color: rgba(76, 76, 76, 0.7);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
-}
-
-.back-button:hover {
-  background-color: rgba(147, 112, 219, 0.7);
+.pin-details-sub-label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #000000;
 }
 
 .pin-details-error {
