@@ -100,7 +100,7 @@ const PinList: React.FC = () => {
     const [latitude, longitude] = location;
     // For development, use a placeholder API key
     // In production, you should use environment variables to store API keys
-    const API_KEY = 'REMOVED_API_KEY ';
+    const API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
     
     try {
       // Example using Google Maps Geocoding API
