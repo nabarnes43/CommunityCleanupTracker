@@ -44,7 +44,7 @@ const MarkerClusterComponent: React.FC<MarkerClusterProps> = ({ markers }) => {
                 <img 
                   src="${imageUrl}" 
                   alt="Site photo" 
-                  style="width: 100px; height: 100px; object-fit: cover; margin: 2px; border-radius: 4px;"
+                  style="width: 200px; height: 200px; object-fit: cover; margin: 2px; border-radius: 4px;"
                   onerror="console.error('Failed to load image:', this.src); this.style.display='none'; this.nextElementSibling.style.display='flex';"
                 />
                 <div style="display: none; width: 100px; height: 100px; background-color: #f0f0f0; justify-content: center; align-items: center; color: #666; font-size: 12px; border-radius: 4px; margin: 2px;">
@@ -82,6 +82,7 @@ const MarkerClusterComponent: React.FC<MarkerClusterProps> = ({ markers }) => {
           const popupContent = `
             <div class="map-popup">
               <h3>${marker.formType || 'Unknown Type'}</h3>
+              ${createImagesSection(marker.images)}
               ${isNewMarker ? '<p style="border: 2px solid red; padding: 5px; border-radius: 4px;"><strong>Status:</strong> Just added</p>' : ''}
               ${marker.date ? `<p><strong>Date:</strong> ${new Date(marker.date + 'T12:00:00').toLocaleDateString()}</p>` : ''}              
               ${marker.details && Object.keys(marker.details).length > 0 ? `
@@ -95,7 +96,6 @@ const MarkerClusterComponent: React.FC<MarkerClusterProps> = ({ markers }) => {
                     }).join('')}
               ` : ''}
               ${marker.notes ? `<p><strong>Notes:</strong> ${marker.notes}</p>` : ''}
-              ${createImagesSection(marker.images)}
             </div>
           `;
 
