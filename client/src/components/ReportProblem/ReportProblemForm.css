@@ -92,6 +92,8 @@
   font-size: 24px;
   padding: 12px;
   background-color: #ede6dd;
+  color: black;
+
   /* Remove default select styling */
   -webkit-appearance: none;
   -moz-appearance: none;
