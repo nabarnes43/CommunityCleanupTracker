@@ -40,6 +40,16 @@
   font-size: 36px;
 }
 
+/* Required field indicator - add asterisk to required form labels */
+.form-group label::after,
+.form-description-group label[for="description"]::after {
+  content: " *";
+  color: #e32;
+  font-size: 16px;
+  position: relative;
+  top: -10px;
+}
+
 .form-description-group {
   display: flex;
   flex-direction: column;
