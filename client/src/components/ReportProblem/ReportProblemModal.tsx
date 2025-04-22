@@ -6,7 +6,7 @@ import './ReportProblemModal.css';
  * Props for the ReportProblemModal component
  */
 interface ReportProblemModalProps {
-  onSubmit: (feedback: { category: string, description: string }) => void;
+  onSubmit: (feedback: { category: string, email: string, description: string }) => void;
   onClose: () => void;
 }
 
