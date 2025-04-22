@@ -14,6 +14,7 @@ import useFormSubmission from './hooks/useFormSubmission';
 import MapDisplay from './components/MapDisplay';
 import MapControls from './components/MapControls';
 import FormModal from './components/FormModal';
+import ReportProblemModal from '../ReportProblem/ReportProblemModal';
 
 /**
  * Home component that displays the map and allows users to add markers
@@ -26,6 +27,8 @@ const Home: React.FC = () => {
   const mapRef = useRef<LeafletMap | null>(null);
   // Track if in detailed view
   const [isDetailedView, setIsDetailedView] = useState(false);
+  // Track if report problem modal should be shown
+  const [showReportProblem, setShowReportProblem] = useState(false);
 
   // Use custom hooks
   const {
@@ -133,6 +136,32 @@ const Home: React.FC = () => {
     }
   };
 
+  /**
+   * Handle the Report Problem button click
+   */
+  const handleReportProblemClick = () => {
+    setShowReportProblem(true);
+  };
+
+  /**
+   * Handle closing the Report Problem modal
+   */
+  const handleReportProblemClose = () => {
+    setShowReportProblem(false);
+  };
+
+  /**
+   * Handle submitting the Report Problem form
+   * 
+   * @param {Object} feedback - The feedback data from the form
+   */
+  const handleReportProblemSubmit = (feedback: { category: string, description: string }) => {
+    // Here you would typically send the feedback to your backend API
+    console.log('Report problem feedback:', feedback);
+    alert('Thank you for your feedback!');
+    setShowReportProblem(false);
+  };
+
   // Store the map reference when it becomes available
   const setMapRef = (map: LeafletMap) => {
     mapRef.current = map;
@@ -169,6 +198,7 @@ const Home: React.FC = () => {
       <MapControls 
         onReportIssue={handleReportIssue}
         onLocationClick={handleLocationClick}
+        onReportProblemClick={handleReportProblemClick}
         disabled={isGeolocating || showForm}
         isDetailedView={isDetailedView}
       />
@@ -179,6 +209,14 @@ const Home: React.FC = () => {
           onSubmit={handleFormSubmit}
           onCancel={handleFormCancel}
           isSubmitting={isSubmitting}
+        />
+      )}
+
+      {/* Report Problem modal */}
+      {showReportProblem && (
+        <ReportProblemModal
+          onSubmit={handleReportProblemSubmit}
+          onClose={handleReportProblemClose}
         />
       )}
     </div>
