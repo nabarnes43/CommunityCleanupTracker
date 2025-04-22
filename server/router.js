@@ -11,6 +11,7 @@ const router = express.Router();
 const userRoutes = require('./routes/userRoutes');
 const markerRoutes = require('./routes/markerRoutes');
 const emailRoutes = require('./routes/emailRoutes');
+const problemRoutes = require('./routes/problemRoutes');
 
 // Import utility controller for API test
 const { apiTest } = require('./controllers/utilController');
@@ -34,6 +35,7 @@ apiRouter.get('/', apiTest);
 apiRouter.use('/users', userRoutes);
 apiRouter.use('/markers', markerRoutes);
 apiRouter.use('/email', emailRoutes);
+apiRouter.use('/problems', problemRoutes);
 
 // Mount API router under /api path
 router.use('/api', apiRouter);

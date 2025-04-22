@@ -1,5 +1,5 @@
 import React from 'react';
-import { customIcon, navigationIcon, navigationBackgroundIcon } from '../mapIcons';
+import { customIcon, navigationIcon, navigationBackgroundIcon, reportProblemIcon } from '../mapIcons';
 
 /**
  * Props for the MapControls component
@@ -7,6 +7,7 @@ import { customIcon, navigationIcon, navigationBackgroundIcon } from '../mapIcon
 interface MapControlsProps {
   onReportIssue: () => void;
   onLocationClick: () => void;
+  onReportProblemClick: () => void;
   disabled: boolean;
   isDetailedView: boolean;
 }
@@ -20,6 +21,7 @@ interface MapControlsProps {
 const MapControls: React.FC<MapControlsProps> = ({
   onReportIssue,
   onLocationClick,
+  onReportProblemClick,
   disabled,
   isDetailedView
 }) => {
@@ -52,6 +54,21 @@ const MapControls: React.FC<MapControlsProps> = ({
           style={{ 
             backgroundImage: `url(${isDetailedView ? navigationIcon.options.iconUrl : navigationBackgroundIcon.options.iconUrl})`,
             backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        ></div>
+      </button>
+
+      <button
+        onClick={onReportProblemClick}
+        className="report-problem-button"
+        aria-label="Report a problem with the app"
+      >
+        <div 
+          className="report-problem-icon"
+          style={{ 
+            backgroundImage: `url(${reportProblemIcon.options.iconUrl})`,
+            backgroundSize: 'contain',
             backgroundPosition: 'center'
           }}
         ></div>

@@ -1,11 +1,8 @@
-Styling for the About component
-
 /* Main container for the About component */
 .about-container {
-  max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
-  font-family: Arial, sans-serif;
+  padding: 12px;
+  font-family: 'Inria Serif', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.6;
   text-align: center;
   height: 100%;
@@ -15,8 +12,9 @@ Styling for the About component
   left: 0;
   right: 0;
   bottom: 0;
+  box-sizing: border-box;
   overflow-y: scroll;
-  background-color: white;
+  background-color: #eae0d5 !important;
   z-index: 10;
   padding-bottom: 80px; /* Give space for the bottom navbar */
 }
@@ -27,30 +25,34 @@ Styling for the About component
 }
 
 .about-container::-webkit-scrollbar-track {
-  background: #f8f9fa;
+  background: #EAE0D5;
   border-radius: 10px;
 }
 
 .about-container::-webkit-scrollbar-thumb {
-  background-color: #3498db;
+  background-color: #6c6063;
   border-radius: 10px;
-  border: 2px solid #f8f9fa;
+  border: 2px solid #EAE0D5;
 }
 
 .about-container::-webkit-scrollbar-thumb:hover {
-  background-color: #2980b9;
+  background-color: #1f3323;
 }
 
 /* TODO Remove this styling from about */
 h1, h2, h3 {
   text-align: center;
   color: #000000;
-  margin-top: 1.5em;
+  margin: 0;
 }
 
 h1 {
   font-size: 2rem;
   margin-bottom: 1.5rem;
+  border: 1px solid black;
+  border-radius: 8px;
+  padding: 8px;
+  background-color: #cebcb6;
 }
 
 h2 {
@@ -63,7 +65,7 @@ h2 {
 h3 {
   font-size: 1.25rem;
   margin-bottom: 0.75rem;
-  color: #2980b9;
+  color: #000000;
 }
 
 p {
@@ -71,7 +73,7 @@ p {
 }
 
 .instructions-container {
-  background-color: #f8f9fa;
+  background-color: #cebcb6;
   border-radius: 8px;
   padding: 25px;
   margin-top: 30px;
@@ -88,8 +90,9 @@ p {
   margin-bottom: 2rem;
   text-align: left;
   padding: 15px;
-  background-color: white;
+  background-color: #EAE0D5;
   border-radius: 6px;
+  border: 1px solid #000000;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
@@ -107,30 +110,99 @@ ul li ul, ol li ul {
 }
 
 a {
-  color: #3498db;
+  color: #6c6063;
   text-decoration: none;
 }
 
 a:hover {
   text-decoration: underline;
+  color: #1f3323;
 }
 
 strong {
   font-weight: bold;
-  color: #e74c3c;
+  color: #6c6063;
 }
 
 .conclusion {
   margin-top: 2rem;
   padding: 15px;
-  background-color: #e8f4f8;
+  background-color: #cebcb6;
   border-radius: 6px;
   text-align: center;
   font-size: 1.1rem;
+  border: 1px solid #000000;
 }
 
 .conclusion p {
   margin-bottom: 0;
+}
+
+/* Example image containers */
+.example-image {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.example-image img {
+  max-width: 80%;
+  border: 1px solid #000;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.icon-example {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin: 10px 0;
+  flex-wrap: wrap;
+}
+
+.icon-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #cebcb6;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #000;
+  width: 100px;
+  margin-bottom: 10px;
+}
+
+.icon-item img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  margin-bottom: 5px;
+}
+
+.icon-label {
+  font-size: 0.9rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Step highlight */
+.step-highlight {
+  background-color: #6c6063;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.step-description {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
 }
 
 /* Responsive adjustments */
@@ -154,5 +226,13 @@ strong {
   
   h3 {
     font-size: 1.2rem;
+  }
+  
+  .example-image img {
+    max-width: 100%;
+  }
+  
+  .icon-item {
+    width: 80px;
   }
 } 

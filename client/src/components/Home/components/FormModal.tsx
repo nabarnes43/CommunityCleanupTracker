@@ -1,5 +1,6 @@
 import React from 'react';
 import PinDataForm from '../../PinDataForm';
+import '../../ReportProblem/ReportProblemModal.css';
 
 /**
  * Props for the FormModal component
@@ -26,7 +27,7 @@ const FormModal: React.FC<FormModalProps> = ({
       <div className="modal-content">
         <button 
           onClick={onCancel} 
-          className="modal-cancel-btn"
+          className="close-button"
         >
           ×
         </button>

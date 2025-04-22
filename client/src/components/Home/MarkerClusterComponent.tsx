@@ -1,21 +1,25 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
+import { createRoot, Root } from 'react-dom/client';
 import 'leaflet.markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
-import { MarkerClusterProps } from '../../types';
+import { useNavigate } from 'react-router-dom';
+import './MarkerCluster.css';
+import { MarkerClusterProps, Marker } from '../../types';
 import { customIcon, newMarkerIcon } from './mapIcons';
+import PinCard from '../PinCard';
 
 /**
  * Component that creates and manages marker clusters on the map
- * 
- * @param {MarkerClusterProps} props - Component props
- * @param {Marker[]} props.markers - Array of markers to display on the map
- * @returns {null} This component doesn't render anything
  */
 const MarkerClusterComponent: React.FC<MarkerClusterProps> = ({ markers }) => {
   const map = useMap();
+  const navigate = useNavigate();
+  // Store root references for each popup
+  const rootRefs = useRef<{[key: string]: Root}>({});
+  const popupRefs = useRef<{[key: string]: HTMLDivElement}>({});
   
   useEffect(() => {
     // Create a cluster group with custom icon styling
@@ -29,34 +33,6 @@ const MarkerClusterComponent: React.FC<MarkerClusterProps> = ({ markers }) => {
       }
     });
 
-    // Helper function to create image HTML - separated for clarity
-    const createImagesSection = (images?: string[]) => {
-      if (!images?.length) return '';
-            
-      return `
-        <div class="popup-images">
-          ${images.map(url => {
-            // Ensure the URL is properly formatted
-            const imageUrl = url.trim();
-            
-            return `
-              <a href="${imageUrl}" target="_blank" class="image-container">
-                <img 
-                  src="${imageUrl}" 
-                  alt="Site photo" 
-                  style="width: 100px; height: 100px; object-fit: cover; margin: 2px; border-radius: 4px;"
-                  onerror="console.error('Failed to load image:', this.src); this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                />
-                <div style="display: none; width: 100px; height: 100px; background-color: #f0f0f0; justify-content: center; align-items: center; color: #666; font-size: 12px; border-radius: 4px; margin: 2px;">
-                  Image unavailable
-                </div>
-              </a>
-            `;
-          }).join('')}
-        </div>
-      `;
-    };
-
     // Get the newly created marker ID from session storage
     const newMarkerID = sessionStorage.getItem('newMarkerID');
     console.log('New marker ID from session storage:', newMarkerID);
@@ -66,7 +42,7 @@ const MarkerClusterComponent: React.FC<MarkerClusterProps> = ({ markers }) => {
 
     // Process markers if they exist
     if (markers?.length > 0) {
-      markers.forEach(marker => {
+      markers.forEach((marker: Marker) => {
         // Validate marker location
         if (marker.location?.length === 2) {
           // Check if this is the newest marker (matches the ID in session storage)
@@ -75,33 +51,39 @@ const MarkerClusterComponent: React.FC<MarkerClusterProps> = ({ markers }) => {
           // Use the appropriate icon
           const icon = isNewMarker ? newMarkerIcon : customIcon;
           
-          // Create a special class for the popup if it's the newest marker
-          const popupClass = isNewMarker ? 'custom-popup highlight-popup' : 'custom-popup';
+          // Create a DOM element for the popup content
+          const popupContainer = document.createElement('div');
           
-          // Create the complete popup content by combining all sections
-          const popupContent = `
-            <div class="map-popup">
-              <h3>${marker.formType || 'Unknown Type'}</h3>
-              ${isNewMarker ? '<p style="border: 2px solid red; padding: 5px; border-radius: 4px;"><strong>Status:</strong> Just added</p>' : ''}
-              ${marker.date ? `<p><strong>Date:</strong> ${new Date(marker.date + 'T12:00:00').toLocaleDateString()}</p>` : ''}              
-              ${marker.details && Object.keys(marker.details).length > 0 ? `
-                  ${Object.entries(marker.details)
-                    .filter(([_, value]) => value !== null && value !== '')
-                    .map(([key, value]) => {
-                      // Format key from camelCase to Title Case (e.g., typeOfDumping → Type Of Dumping)
-                      const formattedKey = key.replace(/([A-Z])/g, ' $1')
-                        .replace(/^./, str => str.toUpperCase());
-                      return `<p><strong>${formattedKey}:</strong> ${value}</p>`;
-                    }).join('')}
-              ` : ''}
-              ${marker.notes ? `<p><strong>Notes:</strong> ${marker.notes}</p>` : ''}
-              ${createImagesSection(marker.images)}
-            </div>
-          `;
-
+          // Use a unique key for each marker even if id is missing
+          const markerKey = marker.id || `marker-${Math.random().toString(36).substr(2, 9)}`;
+          popupRefs.current[markerKey] = popupContainer;
+          
           // Create marker with popup
           const leafletMarker = L.marker(marker.location, { icon })
-            .bindPopup(popupContent, {
+            .bindPopup(popupContainer, {
+              className: isNewMarker ? 'custom-popup highlight-popup' : 'custom-popup',
+              minWidth: 300,
+              maxWidth: 500
+            });
+          
+          // Render the React component to the popup when it opens
+          leafletMarker.on('popupopen', () => {
+            // Create root for this popup container if it doesn't exist
+            if (!rootRefs.current[markerKey]) {
+              rootRefs.current[markerKey] = createRoot(popupContainer);
+            }
+            
+            // Render using the root
+            rootRefs.current[markerKey].render(
+              <PinCard 
+                marker={marker}
+                onClick={() => {
+                  if (marker.id) {
+                    navigate(`/pin/${marker.id}`);
+                  }
+                }}
+              />
+            );
           });
           
           // If this is the new marker, store it separately
@@ -139,11 +121,18 @@ const MarkerClusterComponent: React.FC<MarkerClusterProps> = ({ markers }) => {
         if (newMarker) {
           map.removeLayer(newMarker);
         }
+        
+        // Clean up all React components rendered into popups
+        Object.keys(rootRefs.current).forEach(key => {
+          if (rootRefs.current[key]) {
+            rootRefs.current[key].unmount();
+          }
+        });
       }
     };
-  }, [map, markers]);
+  }, [map, markers, navigate]);
 
   return null;
 };
 
-export default MarkerClusterComponent; 
+export default MarkerClusterComponent;
