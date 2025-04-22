@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchMarkers } from '../../apiService';
 import { Marker } from '../../types';
-import { renderMarkerDescription } from '../../utils/formTypeUtils';
+import PinCard from '../PinCard';
 import './PinList.css';
 
 /**
@@ -106,28 +106,6 @@ const PinList: React.FC = () => {
     navigate(`/pin/${markerId}`);
   };
 
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'No date';
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
-  };
-
-  // Get address for display
-  const getDisplayAddress = (marker: Marker) => {
-    if (marker.id && addresses[marker.id]) {
-      return addresses[marker.id];
-    }
-    
-    // If we don't have an address yet, show loading or coordinates
-    if (marker.location && Array.isArray(marker.location) && marker.location.length === 2) {
-      const [lat, lng] = marker.location;
-      return `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-    }
-    
-    return 'Unknown location';
-  };
-
   return (
     <div className="pin-list-container">
       <h1 className="pin-list-header">Markers</h1>
@@ -142,24 +120,12 @@ const PinList: React.FC = () => {
       
       <div className="pin-list">
         {markers.map((marker) => (
-          <div 
-            key={marker.id} 
-            className="pin-card"
+          <PinCard
+            key={marker.id}
+            marker={marker}
+            address={marker.id ? addresses[marker.id] : undefined}
             onClick={() => marker.id && handlePinClick(marker.id)}
-          >
-            <div className="pin-info">
-              <h3>{getDisplayAddress(marker)}</h3>
-              <p className="pin-description">
-                {renderMarkerDescription(marker)}
-              </p>
-              <p className="pin-date">{formatDate(marker.date || '')}</p>
-            </div>
-            {marker.images && marker.images.length > 0 && (
-              <div className="pin-image">
-                <img src={marker.images[0]} alt={`${marker.formType} at location`} />
-              </div>
-            )}
-          </div>
+          />
         ))}
       </div>
     </div>

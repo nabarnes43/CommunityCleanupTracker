@@ -148,7 +148,6 @@
   }
 }
 
-
 /* Map popup styles - specific to map component */
 .map-popup {
   font-family: 'Inria Serif', serif;
@@ -188,102 +187,4 @@
 
 .popup-images img:hover {
   transform: scale(1.05);
-}
-
-.leaflet-popup-content-wrapper {
-  background-color: #eae0d5;
-}
-
-.leaflet-popup-tip {
-  background-color: #eae0d5;
-}
-
-/* Custom cluster icon styling - specific to map */
-.marker-cluster-custom {
-  background-color: #000;
-  border-radius: 8px;
-  color: white;
-  font-size: 14px;
-  font-weight: bold;
-  width: 40px;
-  height: 40px;
-  border: 2px solid #000000;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-}
-
-/* Style for the number inside the cluster */
-.custom-cluster-icon {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-}
-
-.marker-cluster-custom.large {
-  width: 60px;
-  height: 60px;
-}
-
-.marker-cluster-custom.medium {
-  width: 50px;
-  height: 50px;
-}
-
-.marker-cluster-custom.small {
-  width: 40px;
-  height: 40px;
-}
-
-/* Enhanced popup styling - only custom parts */
-.custom-popup .leaflet-popup-content-wrapper {
-  border-radius: 8px;
-  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
-  text-align: center;
-}
-
-.custom-popup .leaflet-popup-close-button {
-  font-size: 20px;
-  width: 30px;
-  height: 30px;
-  top: 10px;
-  right: 10px;
-  border-radius: 50%;
-  background-color: white;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
-}
-
-.custom-popup .leaflet-popup-close-button:hover {
-  background-color: #f0f0f0;
-  color: #000;
-}
-
-/* Mobile popup styles - only custom parts */
-@media (max-width: 767px) {
-  .custom-popup .leaflet-popup-content-wrapper {
-    max-width: 90vw;
-    max-height: 70vh;
-    overflow-y: auto;
-  }
-  
-  .custom-popup .leaflet-popup-close-button {
-    font-size: 24px;
-    width: 40px;
-    height: 40px;
-  }
-}
-
-/* Highlighted popup for newly added markers */
-.highlight-popup .leaflet-popup-content-wrapper {
-  background-color: #f0f8ff; /* Light blue background */
-  border: 2px solid #007BFF;
-  text-align: center;
-}
-
-.highlight-popup .leaflet-popup-tip {
-  background-color: #007BFF;
 }

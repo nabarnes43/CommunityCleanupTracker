@@ -45,7 +45,7 @@ const PinDetails: React.FC = () => {
   }, [id]);
 
   const handleBack = () => {
-    navigate('/list');
+    navigate(-1); // Go back to the previous page in history
   };
 
   // Format date for display

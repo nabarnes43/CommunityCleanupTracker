@@ -1,0 +1,95 @@
+/* MarkerCluster.css - Optimized popup and marker cluster styling */
+
+/* Basic popup styling */
+.leaflet-popup-content-wrapper {
+  background-color: #eae0d5;
+}
+
+.leaflet-popup-tip {
+  background-color: #eae0d5;
+}
+
+/* Enhanced popup styling */
+.custom-popup .leaflet-popup-content-wrapper {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
+  padding: 0;
+  overflow: hidden;
+}
+
+.custom-popup .leaflet-popup-content {
+  margin: 0 !important;
+  width: 100% !important;
+  min-width: 300px;
+}
+
+.custom-popup .leaflet-popup-close-button {
+  font-size: 20px;
+  width: 30px;
+  height: 30px;
+  top: 10px;
+  right: 10px;
+  border-radius: 50%;
+  background-color: #cebcb6 !important;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+}
+
+.custom-popup .leaflet-popup-close-button:hover {
+  background-color: #f0f0f0;
+  color: #000;
+}
+
+/* Minimal PinCard overrides when in popup */
+.custom-popup .leaflet-popup-content * {
+  font-family: 'Inria Serif', -apple-system, BlinkMacSystemFont !important;
+}
+
+.custom-popup .pin-card {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  cursor: pointer !important;
+}
+
+/* Custom cluster icon styling */
+.marker-cluster-custom {
+  background-color: #000;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  width: 40px;
+  height: 40px;
+  border: 2px solid #000000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.custom-cluster-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+}
+
+.marker-cluster-custom.large {
+  width: 60px;
+  height: 60px;
+}
+
+.marker-cluster-custom.medium {
+  width: 50px;
+  height: 50px;
+}
+
+.marker-cluster-custom.small {
+  width: 40px;
+  height: 40px;
+}
+
