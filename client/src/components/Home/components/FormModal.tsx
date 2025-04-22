@@ -1,5 +1,6 @@
 import React from 'react';
 import PinDataForm from '../../PinDataForm';
+import '../../ReportProblem/ReportProblemModal.css';
 
 /**
  * Props for the FormModal component
