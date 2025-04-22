@@ -163,22 +163,25 @@
 
 /* Report problem button */
 .report-problem-button {
-    width: 48px;
-    height: 48px;
+    width: fit-content;
+    height: fit-content;
+    padding: 0;
     border-radius: 50%;
-    border: 2px solid black;
     background-color: transparent;
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: visible;
+    border: none;
 }
 
 .report-problem-icon {
-    width: 28px;
-    height: 28px;
+    width: 48px;
+    height: 48px;
     cursor: pointer;
-    overflow: hidden;
+    overflow: visible;
     border: none;
+    background-repeat: no-repeat;
 }
 
 .report-problem-button:hover {

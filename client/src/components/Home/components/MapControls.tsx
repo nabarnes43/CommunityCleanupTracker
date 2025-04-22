@@ -68,7 +68,7 @@ const MapControls: React.FC<MapControlsProps> = ({
           className="report-problem-icon"
           style={{ 
             backgroundImage: `url(${reportProblemIcon.options.iconUrl})`,
-            backgroundSize: 'cover',
+            backgroundSize: 'contain',
             backgroundPosition: 'center'
           }}
         ></div>
