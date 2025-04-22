@@ -26,6 +26,8 @@ export interface Marker {
   videos?: string[];
   /** Optional popup text for the marker */
   popUp?: string;
+  /** Optional object containing form-specific details */
+  details?: Record<string, any>;
   
   // Dumping form specific fields
   typeOfDumping?: string;
@@ -74,6 +76,8 @@ export interface PinDataFormProps {
   onSubmit: (formData: FormData) => void;
   /** Callback function when form is cancelled */
   onCancel: () => void;
+  /** Whether the form is currently submitting */
+  isSubmitting?: boolean;
 }
 
 /**

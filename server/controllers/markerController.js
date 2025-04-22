@@ -30,7 +30,7 @@ const getAllMarkers = async (req, res) => {
         id: doc.id,
         location: [data.location.latitude, data.location.longitude],
         title: `${data.formType} Report`,
-        description: data.notes || 'No description provided',
+        notes: data.notes || 'No Notes provided',
         moodNotes: data.moodNotes || null,
         images: data.images || [],
         date: data.date instanceof admin.firestore.Timestamp ? data.date.toDate() : data.date || null,
@@ -42,15 +42,12 @@ const getAllMarkers = async (req, res) => {
       switch(data.formType) {
         case "Dumping":
           marker.details = data.dumpingDetails || {};
-          marker.description = `Type: ${data.dumpingDetails?.typeOfDumping || 'N/A'}\nLocation: ${data.dumpingDetails?.locationOfDumping || 'N/A'}\nAmount: ${data.dumpingDetails?.amountOfDumping || 'N/A'}\n${marker.description}`;
           break;
         case "StandingWater":
           marker.details = data.standingWaterDetails || {};
-          marker.description = `Weather: ${data.standingWaterDetails?.weatherCondition || 'N/A'}\nLocation: ${data.standingWaterDetails?.standingWaterLocation || 'N/A'}\nMold: ${data.standingWaterDetails?.presenceOfMold || 'N/A'}\n${marker.description}`;
           break;
         case "Stormwater":
           marker.details = data.stormwaterProblemDetails || {};
-          marker.description = `Location: ${data.stormwaterProblemDetails?.stormwaterProblemLocation || 'N/A'}\nProblem: ${data.stormwaterProblemDetails?.stormwaterProblemType || 'N/A'}\nCause: ${data.stormwaterProblemDetails?.causeOfClog || 'N/A'}\n${marker.description}`;
           break;
         default:
           // No specific formatting for other types

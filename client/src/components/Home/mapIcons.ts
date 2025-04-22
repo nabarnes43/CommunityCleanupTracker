@@ -14,7 +14,8 @@ export const customIcon = new L.Icon({
  */
 export const newMarkerIcon = new L.Icon({
   iconUrl: require('../../img/newMarker.png'),
-  iconSize: [50, 50]
+  iconSize: [50, 50],
+  zIndexOffset: 1000
 });
 
 /**
@@ -48,7 +49,7 @@ export const userLocationIcon = L.divIcon({
       .pulse-circle-wrapper {
         width: 100%;
         height: 100%;
-        background-color: white;
+        background-color: #eae0d5;
         border-radius: 50% !important;
         display: flex;
         justify-content: center;
@@ -60,7 +61,6 @@ export const userLocationIcon = L.divIcon({
         width: 80%;
         height: 80%;
         animation: pulse 3s infinite ease-in-out;
-        position: relative;
       }
     </style>
     <div class="pulse-circle-wrapper">

@@ -53,7 +53,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
       
       {/* Show the user location marker */}
       {userLocation && showUserMarker && (
-        <Marker position={userLocation} icon={userLocationIcon}>
+        <Marker position={userLocation} icon={userLocationIcon} zIndexOffset={1000}>
           <Popup>Your current location</Popup>
         </Marker>
       )}

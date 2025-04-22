@@ -5,7 +5,6 @@ import DumpingForm from './DumpingForm';
 import StandingWaterForm from './StandingWaterForm';
 import StormwaterForm from './StormwaterForm';
 import ImageCapture from '../ImageCapture';
-// @ts-ignore
 import CalendarIcon from '../../img/Calendar.svg';
 
 /**
@@ -35,7 +34,7 @@ interface FormDataState {
  * @param {PinDataFormProps} props - Component props
  * @returns {JSX.Element} The rendered PinDataForm component
  */
-const PinDataForm: React.FC<PinDataFormProps> = ({ onSubmit, onCancel }) => {
+const PinDataForm: React.FC<PinDataFormProps> = ({ onSubmit, onCancel, isSubmitting = false }) => {
   // Initialize form state with all needed fields
   const [formData, setFormData] = useState<FormDataState>({
     formType: '',
@@ -426,8 +425,21 @@ const PinDataForm: React.FC<PinDataFormProps> = ({ onSubmit, onCancel }) => {
         </div>
       </div>
 
-      <button className="form-button" type="submit">Add Pin</button>
-      <button className="form-button" type="button" onClick={onCancel}>Cancel</button>
+      <button 
+        className="form-button" 
+        type="submit"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? 'Submitting...' : 'Add Pin'}
+      </button>
+      <button 
+        className="form-button" 
+        type="button" 
+        onClick={onCancel}
+        disabled={isSubmitting}
+      >
+        Cancel
+      </button>
     </form>
   );
 };
