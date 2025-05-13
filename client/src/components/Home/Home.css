@@ -112,42 +112,13 @@
   height: 70%;
 }
 
-/* Cancel Button - positioning */
-.modal-cancel-btn {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 2001;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: white;
-  border: none;
-  cursor: pointer;
-  font-size: 32px;
-  color: #333;
-}
-
 @media (max-width: 767px) {
   .modal-content {
       width: 100%;
       height: 100%;
       border-radius: 0;
   }
-
-  .modal-cancel-btn {
-      top: 8px;
-      right: 8px;
-      width: 32px;
-      height: 32px;
-      font-size: 16px;
-  }
 }
-
 
 /* Map popup styles - specific to map component */
 .map-popup {
@@ -190,100 +161,35 @@
   transform: scale(1.05);
 }
 
-.leaflet-popup-content-wrapper {
-  background-color: #eae0d5;
+/* Report problem button */
+.report-problem-button {
+    width: fit-content;
+    height: fit-content;
+    padding: 0;
+    border-radius: 50%;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
+    border: none;
 }
 
-.leaflet-popup-tip {
-  background-color: #eae0d5;
+.report-problem-icon {
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+    overflow: visible;
+    border: none;
+    background-repeat: no-repeat;
 }
 
-/* Custom cluster icon styling - specific to map */
-.marker-cluster-custom {
-  background-color: #000;
-  border-radius: 8px;
-  color: white;
-  font-size: 14px;
-  font-weight: bold;
-  width: 40px;
-  height: 40px;
-  border: 2px solid #000000;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
+.report-problem-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
 
-/* Style for the number inside the cluster */
-.custom-cluster-icon {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-}
-
-.marker-cluster-custom.large {
-  width: 60px;
-  height: 60px;
-}
-
-.marker-cluster-custom.medium {
-  width: 50px;
-  height: 50px;
-}
-
-.marker-cluster-custom.small {
-  width: 40px;
-  height: 40px;
-}
-
-/* Enhanced popup styling - only custom parts */
-.custom-popup .leaflet-popup-content-wrapper {
-  border-radius: 8px;
-  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
-  text-align: center;
-}
-
-.custom-popup .leaflet-popup-close-button {
-  font-size: 20px;
-  width: 30px;
-  height: 30px;
-  top: 10px;
-  right: 10px;
-  border-radius: 50%;
-  background-color: white;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
-}
-
-.custom-popup .leaflet-popup-close-button:hover {
-  background-color: #f0f0f0;
-  color: #000;
-}
-
-/* Mobile popup styles - only custom parts */
-@media (max-width: 767px) {
-  .custom-popup .leaflet-popup-content-wrapper {
-    max-width: 90vw;
-    max-height: 70vh;
-    overflow-y: auto;
-  }
-  
-  .custom-popup .leaflet-popup-close-button {
-    font-size: 24px;
-    width: 40px;
-    height: 40px;
-  }
-}
-
-/* Highlighted popup for newly added markers */
-.highlight-popup .leaflet-popup-content-wrapper {
-  background-color: #f0f8ff; /* Light blue background */
-  border: 2px solid #007BFF;
-  text-align: center;
-}
-
-.highlight-popup .leaflet-popup-tip {
-  background-color: #007BFF;
+.report-problem-button:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
