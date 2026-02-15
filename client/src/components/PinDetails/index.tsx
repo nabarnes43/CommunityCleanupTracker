@@ -6,6 +6,7 @@ import { renderFormTypeDetails } from "../../utils/formTypeUtils";
 import CalendarIcon from "../../img/Calendar.svg";
 import BackArrowIcon from "../../img/BackArrow.png";
 import { formatDate } from "../../utils/formatDate";
+import { reverseGeocode } from "../../utils/reverseGeocode";
 import "./PinDetails.css";
 
 /**
@@ -18,6 +19,7 @@ const PinDetails: React.FC = () => {
   const [pin, setPin] = useState<Marker | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [address, setAddress] = useState<string>("Loading address...");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,14 +47,19 @@ const PinDetails: React.FC = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    if (
+      pin?.location &&
+      Array.isArray(pin.location) &&
+      pin.location.length === 2
+    ) {
+      const [lat, lng] = pin.location;
+      reverseGeocode(lat, lng).then(setAddress);
+    }
+  }, [pin]);
+
   const handleBack = () => {
     navigate(-1); // Go back to the previous page in history
-  };
-
-  // Get address from location coordinates (placeholder)
-  const formatAddress = (location: [number, number] | undefined) => {
-    if (!location) return "Unknown location";
-    return "560 Larkin Street Southwest, Atlanta, GA 30314";
   };
 
   if (loading) {
@@ -86,7 +93,7 @@ const PinDetails: React.FC = () => {
 
       <div className="pin-details-item">
         <h3>Location</h3>
-        <div className="pin-details-value">{formatAddress(pin.location)}</div>
+        <div className="pin-details-value">{address}</div>
       </div>
 
       <div className="pin-details-item">
